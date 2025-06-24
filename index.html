@@ -51,7 +51,7 @@
     async function login() {
       const code = document.getElementById("empCode").value;
       const pass = document.getElementById("password").value;
-      const res = await fetch('YOUR_SCRIPT_URL?type=login&code=' + code + '&pass=' + pass);
+      const res = await fetch('https://script.google.com/macros/s/AKfycbyz_3uiEY1u-pszXKfXkRAPF_NQIk2PU0qu2eUAdKTKEWyiq4K22vwSfNtpbp0jFigMAg/exec?type=login&code=' + code + '&pass=' + pass);
       const result = await res.text();
       if (result === "success") {
         localStorage.setItem("empCode", code);
