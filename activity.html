@@ -62,7 +62,7 @@
       data.append("type", "activity");
       data.append("location", gps);
       data.append("empCode", localStorage.getItem("empCode"));
-      await fetch("YOUR_SCRIPT_URL", { method: "POST", body: data });
+      await fetch("https://script.google.com/macros/s/AKfycbyz_3uiEY1u-pszXKfXkRAPF_NQIk2PU0qu2eUAdKTKEWyiq4K22vwSfNtpbp0jFigMAg/exec", { method: "POST", body: data });
       alert("Activity Submitted");
       form.reset();
     }
