@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Activity Entry</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: sans-serif; padding: 20px; background: #fff3e0; }
+    form {
+      background: white;
+      padding: 1rem;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    input, select, button {
+      width: 100%;
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background: #ff5722;
+      color: white;
+      font-weight: bold;
+      border: none;
+    }
+  </style>
+</head>
+<body onload="getLocation()">
+  <h2>Activity Form</h2>
+  <form id="activityForm">
+    <select name="activityType">
+      <option value="Scheme">Scheme</option>
+      <option value="Visit">Farmer Visit</option>
+      <option value="Sale">Product Sale</option>
+    </select>
+    <input name="customer" placeholder="Customer Name" required>
+    <input name="mobile" placeholder="Mobile Number" required>
+    <input name="product" placeholder="Product / Scheme">
+    <input name="place" placeholder="Location">
+    <input name="cpc" placeholder="CPC Sale" type="number">
+    <input name="snd" placeholder="SND Sale" type="number">
+    <input name="seed" placeholder="SEED Sale" type="number">
+    <input name="feq" placeholder="FEQ Sale" type="number">
+    <input name="vet" placeholder="VET Sale" type="number">
+    <input name="wentwell" placeholder="What went well">
+    <input name="notwell" placeholder="Needs Improvement">
+    <input name="support" placeholder="Support Required">
+    <button type="button" onclick="submitActivity()">Submit</button>
+  </form>
+
+  <script>
+    let gps = "";
+    function getLocation() {
+      navigator.geolocation.getCurrentPosition(pos => {
+        gps = `${pos.coords.latitude},${pos.coords.longitude}`;
+      });
+    }
+    async function submitActivity() {
+      const form = document.getElementById("activityForm");
+      const data = new FormData(form);
+      data.append("type", "activity");
+      data.append("location", gps);
+      data.append("empCode", localStorage.getItem("empCode"));
+      await fetch("YOUR_SCRIPT_URL", { method: "POST", body: data });
+      alert("Activity Submitted");
+      form.reset();
+    }
+  </script>
+</body>
+</html>
