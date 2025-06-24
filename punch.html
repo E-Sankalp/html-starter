@@ -59,7 +59,7 @@
       formData.append("type", type);
       formData.append("location", gps);
       formData.append("empCode", localStorage.getItem("empCode"));
-      await fetch("YOUR_SCRIPT_URL", { method: "POST", body: formData });
+      await fetch("https://script.google.com/macros/s/AKfycbyz_3uiEY1u-pszXKfXkRAPF_NQIk2PU0qu2eUAdKTKEWyiq4K22vwSfNtpbp0jFigMAg/exec", { method: "POST", body: formData });
       alert("Submitted");
       form.reset();
     }
