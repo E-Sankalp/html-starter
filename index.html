@@ -1,38 +1,102 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Login</title>
+  <meta charset="UTF-8">
+  <title>Login | Sankalp Tracker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <style>
-    body { font-family: Arial; text-align: center; padding: 50px; }
-    input, button { margin: 10px; padding: 10px; width: 80%; max-width: 300px; }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f2f5f7;
+      color: #333;
+    }
+    .container {
+      padding: 20px;
+      max-width: 450px;
+      margin: 0 auto;
+    }
+    h2 {
+      text-align: center;
+      color: #2f7b47;
+      margin-bottom: 30px;
+    }
+    form {
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    input, button {
+      width: 100%;
+      padding: 14px;
+      margin: 12px 0;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-family: inherit;
+    }
+    button {
+      background: #2f7b47;
+      color: white;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #25663a;
+    }
+    @media (max-width: 480px) {
+      body {
+        padding: 10px;
+      }
+      .container {
+        padding: 10px;
+      }
+      input, button {
+        padding: 12px;
+        font-size: 15px;
+      }
+    }
   </style>
 </head>
 <body>
-  <h2>Employee Login</h2>
-  <input type="text" id="code" placeholder="Employee Code" /><br>
-  <input type="password" id="pass" placeholder="Password" /><br>
-  <button onclick="login()">Login</button>
+  <div class="container">
+    <h2>🔐 Sankalp Login</h2>
+    <form>
+      <input id="empCode" placeholder="Employee Code" required>
+      <input id="password" type="password" placeholder="Password" required>
+      <button type="button" onclick="login()">Login</button>
+    </form>
+  </div>
 
   <script>
     async function login() {
-      const code = document.getElementById("code").value;
-      const pass = document.getElementById("pass").value;
-      const form = new FormData();
-      form.append("type", "login");
-      form.append("code", code);
-      form.append("pass", pass);
+      const empCode = document.getElementById("empCode").value.trim();
+      const password = document.getElementById("password").value.trim();
 
-      const res = await fetch("https://script.google.com/macros/s/AKfycbyWcco7uBhkK4LaQ10UdU4advqqJkhDCnfBLkl585XBJEE7hzRWAR3oijEdpjbihnRKCQ/exec", {
+      const formData = new URLSearchParams();
+      formData.append("type", "login");
+      formData.append("empCode", empCode);
+      formData.append("password", password);
+
+      const res = await fetch("YOUR_SCRIPT_URL", {
         method: "POST",
-        body: form,
+        body: formData
       });
 
-      const text = await res.text();
-      if (text === "success") {
-        localStorage.setItem("empCode", code);
-        window.location.href = "?page=menu";
+      const data = await res.json();
+      if (data.success) {
+        alert("✅ Welcome " + data.empName);
+        localStorage.setItem("empCode", empCode);
+        window.location.href = "menu.html";
       } else {
-        alert("Invalid credentials");
+        alert("❌ Invalid login. Please try again.");
       }
     }
   </script>
