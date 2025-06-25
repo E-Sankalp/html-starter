@@ -1,63 +1,128 @@
-<script>
-  let punchInGPS = "";
-  let currentGPS = "";
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Punch In/Out</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 30px;
+      text-align: center;
+    }
+    input, button {
+      padding: 10px;
+      margin: 10px;
+      width: 80%;
+      max-width: 300px;
+      font-size: 16px;
+    }
+    button {
+      background-color: #2196F3;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+    button:hover {
+      background-color: #0b7dda;
+    }
+    #gps-status {
+      margin-bottom: 15px;
+      font-size: 14px;
+      color: green;
+    }
+  </style>
+</head>
+<body onload="getLocation()">
+  <h2>📍 Punch In / Punch Out</h2>
+  <div id="gps-status">📡 Getting location...</div>
 
-  // Get current location
-  function getLocation() {
-    navigator.geolocation.getCurrentPosition(pos => {
-      currentGPS = `${pos.coords.latitude},${pos.coords.longitude}`;
-      if (!localStorage.getItem("punchInGPS")) {
-        localStorage.setItem("punchInGPS", currentGPS); // Save for Punch Out
+  <form id="punchin">
+    <input type="number" name="km" placeholder="Opening KM" required>
+    <button type="button" onclick="submitForm('punchin')">✅ Punch In</button>
+  </form>
+
+  <form id="punchout">
+    <input type="number" name="km" placeholder="Closing KM" required>
+    <button type="button" onclick="submitForm('punchout')">🕘 Punch Out</button>
+  </form>
+
+  <button onclick="window.location.href='?page=menu'">🔙 Back to Menu</button>
+
+  <script>
+    let currentGPS = "";
+    let punchInGPS = "";
+
+    function getLocation() {
+      if (!navigator.geolocation) {
+        document.getElementById('gps-status').innerText = '❌ GPS not supported';
+        return;
       }
-    });
-  }
-
-  async function submitForm(type) {
-    const form = document.getElementById(type);
-    const formData = new FormData(form);
-    const empCode = localStorage.getItem("empCode");
-
-    let location = currentGPS;
-    if (type === "punchin") {
-      localStorage.setItem("punchInGPS", location);
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          currentGPS = `${lat},${lng}`;
+          document.getElementById('gps-status').innerText = `📍 Location Captured`;
+          if (!localStorage.getItem("punchInGPS")) {
+            localStorage.setItem("punchInGPS", currentGPS);
+          }
+        },
+        () => {
+          document.getElementById('gps-status').innerText = '❌ Unable to retrieve location';
+        }
+      );
     }
 
-    formData.append("type", type);
-    formData.append("empCode", empCode);
-    formData.append("location", location);
+    async function submitForm(type) {
+      const form = document.getElementById(type);
+      const empCode = localStorage.getItem("empCode");
+      const location = currentGPS;
+      const km = form.km.value;
 
-    const res = await fetch("YOUR_SCRIPT_URL", {
-      method: "POST",
-      body: formData,
-    });
-
-    if (type === "punchout") {
-      const outCoords = currentGPS.split(",").map(Number);
-      const inCoords = localStorage.getItem("punchInGPS").split(",").map(Number);
-      const gpsKM = haversineDistance(inCoords[0], inCoords[1], outCoords[0], outCoords[1]);
-      const manualKM = parseFloat(form.km.value);
-      const diff = Math.abs(gpsKM - manualKM);
-
-      alert(`📍 GPS KM: ${gpsKM.toFixed(2)} KM\n📏 Manual KM: ${manualKM} KM`);
-      if (diff > 10) {
-        alert("⚠️ Alert: GPS & Manual KM differ by more than 10 KM!");
+      if (!empCode || !location || !km) {
+        alert("❗ Please fill all fields and ensure GPS is available.");
+        return;
       }
-    } else {
-      alert("Submitted");
+
+      const formData = new FormData();
+      formData.append("type", type);
+      formData.append("empCode", empCode);
+      formData.append("km", km);
+      formData.append("location", location);
+
+      const response = await fetch("<?= ScriptApp.getService().getUrl() ?>", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (type === "punchout") {
+        const outCoords = location.split(',').map(Number);
+        const inCoords = (localStorage.getItem("punchInGPS") || "0,0").split(',').map(Number);
+        const gpsKM = haversineDistance(inCoords[0], inCoords[1], outCoords[0], outCoords[1]);
+        const manualKM = parseFloat(km);
+        const diff = Math.abs(manualKM - gpsKM);
+
+        alert(`📏 Manual KM: ${manualKM}\n📍 GPS KM: ${gpsKM.toFixed(2)}\n🧾 Difference: ${diff.toFixed(2)} KM`);
+        if (diff > 10) {
+          alert("⚠️ Manual and GPS KM differ significantly!");
+        }
+      }
+
+      alert("✅ Submitted Successfully");
+      form.reset();
     }
 
-    form.reset();
-  }
+    function haversineDistance(lat1, lon1, lat2, lon2) {
+      const R = 6371; // Radius of Earth in KM
+      const dLat = toRad(lat2 - lat1);
+      const dLon = toRad(lon2 - lon1);
+      const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return R * c;
+    }
 
-  function haversineDistance(lat1, lon1, lat2, lon2) {
-    function toRad(x) { return x * Math.PI / 180; }
-    const R = 6371;
-    const dLat = toRad(lat2 - lat1);
-    const dLon = toRad(lon2 - lon1);
-    const a = Math.sin(dLat / 2) ** 2 +
-              Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-              Math.sin(dLon / 2) ** 2;
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
-  }
-</script>
+    function toRad(deg) {
+      return deg * Math.PI / 180;
+    }
+  </script>
+</body>
+</html>
