@@ -85,7 +85,7 @@
       formData.append("empCode", empCode);
       formData.append("password", password);
 
-      const res = await fetch("YOUR_SCRIPT_URL", {
+      const res = await fetch("https://script.google.com/macros/s/AKfycbzemJVUlSXwcTnh09SlsrIfpq_-2r-a5O-9eydzTthp0xVGjW9uezw1R2uyN2zzDO5p3Q/exec", {
         method: "POST",
         body: formData
       });
