@@ -1,69 +1,115 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Activity Entry</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Activity Reporting</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    body { font-family: sans-serif; padding: 20px; background: #fff3e0; }
-    form {
-      background: white;
-      padding: 1rem;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 20px;
     }
-    input, select, button {
+    input, textarea, select, button {
+      display: block;
       width: 100%;
-      margin-top: 10px;
+      max-width: 400px;
+      margin: 10px auto;
       padding: 10px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
+      font-size: 16px;
+      font-family: inherit;
     }
     button {
-      background: #ff5722;
+      background: #4CAF50;
       color: white;
-      font-weight: bold;
       border: none;
+      border-radius: 5px;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    #gps-status {
+      text-align: center;
+      margin-bottom: 15px;
+      color: green;
+      font-family: inherit;
+    }
+    h2 {
+      text-align: center;
+      font-family: inherit;
     }
   </style>
 </head>
 <body onload="getLocation()">
-  <h2>Activity Form</h2>
+  <h2>📝 Activity Reporting</h2>
+
+  <div id="gps-status">📡 Locating...</div>
+
   <form id="activityForm">
-    <select name="activityType">
-      <option value="Scheme">Scheme</option>
-      <option value="Visit">Farmer Visit</option>
-      <option value="Sale">Product Sale</option>
+    <select name="activityType" required>
+      <option value="">Select Activity Type</option>
+      <option value="Farmer Visit">Farmer Visit</option>
+      <option value="Demo">Demo</option>
+      <option value="Dealer Visit">Dealer Visit</option>
+      <option value="Other">Other</option>
     </select>
-    <input name="customer" placeholder="Customer Name" required>
-    <input name="mobile" placeholder="Mobile Number" required>
-    <input name="product" placeholder="Product / Scheme">
-    <input name="place" placeholder="Location">
-    <input name="cpc" placeholder="CPC Sale" type="number">
-    <input name="snd" placeholder="SND Sale" type="number">
-    <input name="seed" placeholder="SEED Sale" type="number">
-    <input name="feq" placeholder="FEQ Sale" type="number">
-    <input name="vet" placeholder="VET Sale" type="number">
-    <input name="wentwell" placeholder="What went well">
-    <input name="notwell" placeholder="Needs Improvement">
-    <input name="support" placeholder="Support Required">
-    <button type="button" onclick="submitActivity()">Submit</button>
+
+    <input type="text" name="customer" placeholder="Customer / Farmer Name" required>
+    <input type="tel" name="mobile" placeholder="Mobile Number (10 digits)" pattern="^[6-9][0-9]{9}$" maxlength="10">
+    <textarea name="whatWentWell" placeholder="What went well" rows="2"></textarea>
+    <textarea name="needsImprovement" placeholder="What needs improvement" rows="2"></textarea>
+    <textarea name="supportRequired" placeholder="Support required" rows="2"></textarea>
+    <textarea name="remarks" placeholder="Additional Remarks" rows="2"></textarea>
+    <input type="number" name="orderAmount" placeholder="Order Amount (₹ if any)">
+
+    <button type="button" onclick="submitActivity()">📤 Submit</button>
+    <button type="button" onclick="window.location.href='?page=menu'">🔙 Back to Menu</button>
   </form>
 
   <script>
-    let gps = "";
+    let currentGPS = "";
+
     function getLocation() {
-      navigator.geolocation.getCurrentPosition(pos => {
-        gps = `${pos.coords.latitude},${pos.coords.longitude}`;
-      });
+      if (!navigator.geolocation) {
+        document.getElementById('gps-status').innerText = '❌ GPS not supported';
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          currentGPS = `${position.coords.latitude},${position.coords.longitude}`;
+          document.getElementById('gps-status').innerText = '📍 Location Captured';
+        },
+        () => {
+          document.getElementById('gps-status').innerText = '❌ Failed to get GPS location';
+        }
+      );
     }
+
     async function submitActivity() {
-      const form = document.getElementById("activityForm");
-      const data = new FormData(form);
-      data.append("type", "activity");
-      data.append("location", gps);
-      data.append("empCode", localStorage.getItem("empCode"));
-      await fetch("https://script.google.com/macros/s/AKfycbyz_3uiEY1u-pszXKfXkRAPF_NQIk2PU0qu2eUAdKTKEWyiq4K22vwSfNtpbp0jFigMAg/exec", { method: "POST", body: data });
-      alert("Activity Submitted");
+      const form = document.getElementById('activityForm');
+      const empCode = localStorage.getItem('empCode');
+      const location = currentGPS;
+      const mobile = form.mobile.value.trim();
+
+      if (!empCode || !location) {
+        alert('❗ GPS or employee code missing');
+        return;
+      }
+
+      if (mobile && !/^[6-9][0-9]{9}$/.test(mobile)) {
+        alert('❗ Please enter a valid 10-digit mobile number starting with 6-9.');
+        return;
+      }
+
+      const formData = new FormData(form);
+      formData.append('type', 'activity');
+      formData.append('empCode', empCode);
+      formData.append('location', location);
+
+      const response = await fetch('<?= ScriptApp.getService().getUrl() ?>', {
+        method: 'POST',
+        body: formData
+      });
+
+      alert('✅ Activity logged successfully');
       form.reset();
     }
   </script>
