@@ -1,74 +1,81 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Sales Entry</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
+  <title>Sale Entry | Sankalp</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <style>
+    * { box-sizing: border-box; }
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      padding: 20px;
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f2f5f7;
+      color: #333;
     }
-    h3 { text-align: center; margin-top: 30px; }
+    .container {
+      padding: 20px;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    h2 {
+      text-align: center;
+      color: #2f7b47;
+      margin-bottom: 20px;
+    }
+    form {
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
     input, textarea, button {
-      display: block;
       width: 100%;
-      max-width: 400px;
-      margin: 8px auto;
-      padding: 10px;
+      padding: 14px;
+      margin: 10px 0;
       font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-family: inherit;
     }
     button {
-      background: #007bff;
+      background: #2f7b47;
       color: white;
+      font-weight: bold;
       border: none;
-      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s;
     }
     button:hover {
-      background: #0056b3;
+      background: #25663a;
     }
     #gps-status {
       text-align: center;
-      margin-bottom: 15px;
-      color: green;
+      color: #2f7b47;
+      margin-bottom: 10px;
+    }
+    @media (max-width: 480px) {
+      body, .container { padding: 10px; }
+      input, textarea, button { font-size: 15px; padding: 12px; }
     }
   </style>
 </head>
-<body onload="getLocation()">
-  <h2 style="text-align:center;">🧾 Category-wise Sales Entry</h2>
+<body>
+  <div class="container">
+    <h2>📦 Sale Entry</h2>
+    <div id="gps-status">📡 Locating GPS...</div>
 
-  <div id="gps-status">📡 Locating...</div>
+    <form id="saleForm">
+      <input type="number" name="cpcSale" placeholder="CPC Sale Amount (₹)">
+      <input type="number" name="sndSale" placeholder="SND Sale Amount (₹)">
+      <input type="number" name="seedSale" placeholder="SEED Sale Amount (₹)">
+      <input type="number" name="vetSale" placeholder="VET Sale Amount (₹)">
+      <input type="number" name="feqSale" placeholder="FEQ Sale Amount (₹)">
+      <textarea name="remarks" placeholder="Remarks (optional)"></textarea>
 
-  <form id="saleForm">
-    <h3>🟦 CPC Sale</h3>
-    <input type="text" name="cpc_product" placeholder="Product Name">
-    <input type="number" name="cpc_qty" placeholder="Quantity">
-    <input type="number" name="cpc_amt" placeholder="Amount (₹)">
-
-    <h3>🟨 SND Sale</h3>
-    <input type="text" name="snd_product" placeholder="Product Name">
-    <input type="number" name="snd_qty" placeholder="Quantity">
-    <input type="number" name="snd_amt" placeholder="Amount (₹)">
-
-    <h3>🟩 SEED Sale</h3>
-    <input type="text" name="seed_product" placeholder="Product Name">
-    <input type="number" name="seed_qty" placeholder="Quantity">
-    <input type="number" name="seed_amt" placeholder="Amount (₹)">
-
-    <h3>🟥 VET Sale</h3>
-    <input type="text" name="vet_product" placeholder="Product Name">
-    <input type="number" name="vet_qty" placeholder="Quantity">
-    <input type="number" name="vet_amt" placeholder="Amount (₹)">
-
-    <h3>🟪 FEQ Sale</h3>
-    <input type="text" name="feq_product" placeholder="Product Name">
-    <input type="number" name="feq_qty" placeholder="Quantity">
-    <input type="number" name="feq_amt" placeholder="Amount (₹)">
-
-    <textarea name="remarks" placeholder="General Remarks (Optional)" rows="2"></textarea>
-
-    <button type="button" onclick="submitSale()">📤 Submit</button>
-    <button type="button" onclick="window.location.href='?page=menu'">🔙 Back to Menu</button>
-  </form>
+      <button type="button" onclick="submitSale()">Submit Sale</button>
+    </form>
+  </div>
 
   <script>
     let currentGPS = "";
@@ -79,39 +86,39 @@
         return;
       }
       navigator.geolocation.getCurrentPosition(
-        (position) => {
-          currentGPS = `${position.coords.latitude},${position.coords.longitude}`;
-          document.getElementById('gps-status').innerText = '📍 Location Captured';
+        pos => {
+          currentGPS = `${pos.coords.latitude},${pos.coords.longitude}`;
+          document.getElementById('gps-status').innerText = '📍 Location captured';
         },
-        () => {
-          document.getElementById('gps-status').innerText = '❌ Failed to get GPS location';
+        err => {
+          document.getElementById('gps-status').innerText = '❌ Unable to fetch GPS';
         }
       );
     }
 
     async function submitSale() {
-      const form = document.getElementById('saleForm');
-      const empCode = localStorage.getItem('empCode');
-      const location = currentGPS;
-
-      if (!empCode || !location) {
-        alert('❗ GPS or employee code missing');
-        return;
+      const empCode = localStorage.getItem("empCode");
+      if (!empCode || !currentGPS) {
+        return alert("❗ Missing employee code or GPS location.");
       }
 
+      const form = document.getElementById("saleForm");
       const formData = new FormData(form);
-      formData.append('type', 'sale');
-      formData.append('empCode', empCode);
-      formData.append('location', location);
+      formData.append("type", "sale");
+      formData.append("empCode", empCode);
+      formData.append("location", currentGPS);
 
-      const response = await fetch('https://script.google.com/macros/s/AKfycbyz_3uiEY1u-pszXKfXkRAPF_NQIk2PU0qu2eUAdKTKEWyiq4K22vwSfNtpbp0jFigMAg/exec', {
-        method: 'POST',
+      const res = await fetch("YOUR_SCRIPT_URL", {
+        method: "POST",
         body: formData
       });
 
-      alert('✅ Sale logged successfully');
+      const text = await res.text();
+      alert(text);
       form.reset();
     }
+
+    window.onload = getLocation;
   </script>
 </body>
 </html>
