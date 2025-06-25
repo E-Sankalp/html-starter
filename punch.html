@@ -1,100 +1,135 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Punch In/Out</title>
+  <meta charset="UTF-8">
+  <title>Punch In / Out | Sankalp</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <style>
-    body { font-family: Arial; text-align: center; padding: 30px; }
-    input, button { padding: 10px; margin: 10px; width: 80%; max-width: 300px; }
-    button { background: #2196F3; color: white; border: none; border-radius: 5px; }
-    #gps-status { font-size: 14px; color: green; }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f2f5f7;
+      color: #333;
+    }
+    .container {
+      padding: 20px;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    h2 {
+      text-align: center;
+      color: #2f7b47;
+      margin-bottom: 20px;
+    }
+    form {
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    input, select, button {
+      width: 100%;
+      padding: 14px;
+      margin: 10px 0;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-family: inherit;
+    }
+    input[type="file"] {
+      padding: 5px;
+    }
+    button {
+      background: #2f7b47;
+      color: white;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #25663a;
+    }
+    #gps-status {
+      text-align: center;
+      color: #2f7b47;
+      margin-bottom: 10px;
+    }
+    @media (max-width: 480px) {
+      body, .container { padding: 10px; }
+      input, button, select { font-size: 15px; padding: 12px; }
+    }
   </style>
 </head>
-<body onload="getLocation()">
-  <h2>📍 Punch In / Out</h2>
-  <div id="gps-status">📡 Getting location...</div>
+<body>
+  <div class="container">
+    <h2>📍 Punch In / Out</h2>
+    <div id="gps-status">📡 Locating GPS...</div>
 
-  <form id="punchin">
-    <input type="number" name="km" placeholder="Opening KM" required><br>
-    <input type="file" name="photo" accept="image/*" capture="environment" required><br>
-    <button type="button" onclick="submitForm('punchin')">✅ Punch In</button>
-  </form>
+    <form id="punchForm">
+      <select id="mode" required>
+        <option value="">Select Mode</option>
+        <option value="IN">Punch In</option>
+        <option value="OUT">Punch Out</option>
+      </select>
 
-  <form id="punchout">
-    <input type="number" name="km" placeholder="Closing KM" required><br>
-    <input type="file" name="photo" accept="image/*" capture="environment" required><br>
-    <button type="button" onclick="submitForm('punchout')">🕘 Punch Out</button>
-  </form>
+      <input type="number" id="km" placeholder="Enter Odometer KM" required>
+      <input type="file" id="photo" accept="image/*" capture="environment" required>
 
-  <button onclick="window.location.href='?page=menu'">🔙 Back to Menu</button>
+      <button type="button" onclick="submitPunch()">Submit Punch</button>
+    </form>
+  </div>
 
   <script>
-    let currentGPS = "";
-    let punchInGPS = "";
+    let gpsLocation = "";
 
     function getLocation() {
+      if (!navigator.geolocation) {
+        document.getElementById('gps-status').innerText = '❌ GPS not supported';
+        return;
+      }
       navigator.geolocation.getCurrentPosition(
-        (position) => {
-          currentGPS = `${position.coords.latitude},${position.coords.longitude}`;
-          document.getElementById('gps-status').innerText = `📍 Location Captured`;
-          if (!localStorage.getItem("punchInGPS")) {
-            localStorage.setItem("punchInGPS", currentGPS);
-          }
+        pos => {
+          gpsLocation = `${pos.coords.latitude},${pos.coords.longitude}`;
+          document.getElementById('gps-status').innerText = '📍 Location captured';
         },
-        () => document.getElementById('gps-status').innerText = '❌ Unable to get location'
+        err => {
+          document.getElementById('gps-status').innerText = '❌ Unable to fetch GPS';
+        }
       );
     }
 
-    async function submitForm(type) {
-      const form = document.getElementById(type);
+    async function submitPunch() {
       const empCode = localStorage.getItem("empCode");
-      const location = currentGPS;
-      const km = form.km.value;
-      const photoFile = form.photo.files[0];
+      const km = document.getElementById("km").value.trim();
+      const mode = document.getElementById("mode").value;
+      const photoFile = document.getElementById("photo").files[0];
 
-      if (!empCode || !location || !km || !photoFile) {
-        alert("Please fill all fields and attach photo.");
+      if (!empCode || !km || !mode || !gpsLocation || !photoFile) {
+        alert("❗ Please fill all fields and attach a photo.");
         return;
       }
 
-      const photoData = new FormData();
-      photoData.append("photo", photoFile);
-      photoData.append("type", type);
-      photoData.append("empCode", empCode);
-      photoData.append("km", km);
-      photoData.append("location", location);
+      const formData = new FormData();
+      formData.append("type", "punch");
+      formData.append("empCode", empCode);
+      formData.append("km", km);
+      formData.append("mode", mode);
+      formData.append("location", gpsLocation);
+      formData.append("photo", photoFile);
 
-      const response = await fetch("https://script.google.com/macros/s/AKfycbyz_3uiEY1u-pszXKfXkRAPF_NQIk2PU0qu2eUAdKTKEWyiq4K22vwSfNtpbp0jFigMAg/exec", {
+      const res = await fetch("YOUR_SCRIPT_URL", {
         method: "POST",
-        body: photoData,
+        body: formData
       });
 
-      if (type === "punchout") {
-        const outCoords = location.split(',').map(Number);
-        const inCoords = (localStorage.getItem("punchInGPS") || "0,0").split(',').map(Number);
-        const gpsKM = haversineDistance(inCoords[0], inCoords[1], outCoords[0], outCoords[1]);
-        const manualKM = parseFloat(km);
-        const diff = Math.abs(manualKM - gpsKM);
-
-        alert(`📏 Manual KM: ${manualKM}\n📍 GPS KM: ${gpsKM.toFixed(2)}\n🧾 Difference: ${diff.toFixed(2)} KM`);
-        if (diff > 10) alert("⚠️ Manual and GPS KM differ significantly!");
-      }
-
-      alert("✅ Submitted Successfully");
-      form.reset();
+      const text = await res.text();
+      alert(text);
     }
 
-    function haversineDistance(lat1, lon1, lat2, lon2) {
-      const R = 6371;
-      const dLat = toRad(lat2 - lat1);
-      const dLon = toRad(lon2 - lon1);
-      const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      return R * c;
-    }
-
-    function toRad(x) {
-      return x * Math.PI / 180;
-    }
+    window.onload = getLocation;
   </script>
 </body>
 </html>
