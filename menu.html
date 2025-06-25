@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      text-align: center;
+      padding: 30px;
+    }
+    h2 {
+      margin-bottom: 40px;
+    }
+    button {
+      display: block;
+      width: 80%;
+      max-width: 300px;
+      margin: 15px auto;
+      padding: 15px;
+      font-size: 18px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 10px;
+    }
+    button:hover {
+      background-color: #388e3c;
+    }
+    #welcome {
+      font-size: 16px;
+      margin-bottom: 20px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <h2>🚀 Sankalp Field Dashboard</h2>
+  <div id="welcome">Welcome, <span id="empName"></span> (Code: <span id="empCode"></span>)</div>
+
+  <button onclick="go('punch')">👊 Punch In / Out</button>
+  <button onclick="go('activity')">📝 Activity Reporting</button>
+  <button onclick="go('sale')">🧾 Sale Entry</button>
+  <button onclick="go('ta')">📊 TA Summary</button>
+  <button onclick="logout()">🚪 Logout</button>
+
+  <script>
+    const empCode = localStorage.getItem('empCode') || '';
+    const empName = localStorage.getItem('empName') || '';
+
+    document.getElementById('empCode').textContent = empCode;
+    document.getElementById('empName').textContent = empName;
+
+    function go(page) {
+      window.location.href = `?page=${page}`;
+    }
+
+    function logout() {
+      localStorage.removeItem('empCode');
+      localStorage.removeItem('empName');
+      window.location.href = '?page=login';
+    }
+  </script>
+</body>
+</html>
