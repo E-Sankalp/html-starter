@@ -1,64 +1,82 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
+  <title>Dashboard | Sankalp</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <style>
+    * { box-sizing: border-box; }
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      text-align: center;
-      padding: 30px;
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f0f4f7;
+      color: #333;
+    }
+    .container {
+      max-width: 500px;
+      margin: auto;
+      padding: 20px;
     }
     h2 {
-      margin-bottom: 40px;
+      text-align: center;
+      color: #2f7b47;
+      margin-bottom: 20px;
     }
-    button {
+    .btn {
       display: block;
-      width: 80%;
-      max-width: 300px;
-      margin: 15px auto;
-      padding: 15px;
+      width: 100%;
+      padding: 16px;
+      margin: 12px 0;
       font-size: 18px;
-      background-color: #4CAF50;
+      text-align: center;
+      background: #2f7b47;
       color: white;
-      border: none;
+      text-decoration: none;
       border-radius: 10px;
+      font-weight: bold;
+      transition: background 0.3s;
     }
-    button:hover {
-      background-color: #388e3c;
+    .btn:hover {
+      background: #25663a;
+    }
+    .logout {
+      background: #b91c1c;
+    }
+    .logout:hover {
+      background: #991b1b;
     }
     #welcome {
+      text-align: center;
       font-size: 16px;
-      margin-bottom: 20px;
+      margin-bottom: 10px;
       color: #333;
     }
   </style>
 </head>
 <body>
-  <h2>🚀 Sankalp Field Dashboard</h2>
-  <div id="welcome">Welcome, <span id="empName"></span> (Code: <span id="empCode"></span>)</div>
+  <div class="container">
+    <h2>👋 Welcome to Sankalp Tracker</h2>
+    <div id="welcome">Loading...</div>
 
-  <button onclick="go('punch')">👊 Punch In / Out</button>
-  <button onclick="go('activity')">📝 Activity Reporting</button>
-  <button onclick="go('sale')">🧾 Sale Entry</button>
-  <button onclick="go('ta')">📊 TA Summary</button>
-  <button onclick="logout()">🚪 Logout</button>
+    <a class="btn" href="punch.html">📍 Punch In / Out</a>
+    <a class="btn" href="activity.html">📝 Activity Reporting</a>
+    <a class="btn" href="sale.html">📦 Sale Entry</a>
+    <a class="btn logout" href="#" onclick="logout()">🚪 Logout</a>
+  </div>
 
   <script>
-    const empCode = localStorage.getItem('empCode') || '';
-    const empName = localStorage.getItem('empName') || '';
-
-    document.getElementById('empCode').textContent = empCode;
-    document.getElementById('empName').textContent = empName;
-
-    function go(page) {
-      window.location.href = `?page=${page}`;
+    const empCode = localStorage.getItem("empCode");
+    if (!empCode) {
+      alert("Please login again");
+      window.location.href = "login.html";
+    } else {
+      document.getElementById("welcome").innerText = "Logged in as: " + empCode;
     }
 
     function logout() {
-      localStorage.removeItem('empCode');
-      localStorage.removeItem('empName');
-      window.location.href = '?page=login';
+      localStorage.clear();
+      window.location.href = "login.html";
     }
   </script>
 </body>
