@@ -3,45 +3,25 @@
 <head>
   <title>Punch In/Out</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 30px;
-      text-align: center;
-    }
-    input, button {
-      padding: 10px;
-      margin: 10px;
-      width: 80%;
-      max-width: 300px;
-      font-size: 16px;
-    }
-    button {
-      background-color: #2196F3;
-      color: white;
-      border: none;
-      border-radius: 5px;
-    }
-    button:hover {
-      background-color: #0b7dda;
-    }
-    #gps-status {
-      margin-bottom: 15px;
-      font-size: 14px;
-      color: green;
-    }
+    body { font-family: Arial; text-align: center; padding: 30px; }
+    input, button { padding: 10px; margin: 10px; width: 80%; max-width: 300px; }
+    button { background: #2196F3; color: white; border: none; border-radius: 5px; }
+    #gps-status { font-size: 14px; color: green; }
   </style>
 </head>
 <body onload="getLocation()">
-  <h2>📍 Punch In / Punch Out</h2>
+  <h2>📍 Punch In / Out</h2>
   <div id="gps-status">📡 Getting location...</div>
 
   <form id="punchin">
-    <input type="number" name="km" placeholder="Opening KM" required>
+    <input type="number" name="km" placeholder="Opening KM" required><br>
+    <input type="file" name="photo" accept="image/*" capture="environment" required><br>
     <button type="button" onclick="submitForm('punchin')">✅ Punch In</button>
   </form>
 
   <form id="punchout">
-    <input type="number" name="km" placeholder="Closing KM" required>
+    <input type="number" name="km" placeholder="Closing KM" required><br>
+    <input type="file" name="photo" accept="image/*" capture="environment" required><br>
     <button type="button" onclick="submitForm('punchout')">🕘 Punch Out</button>
   </form>
 
@@ -52,23 +32,15 @@
     let punchInGPS = "";
 
     function getLocation() {
-      if (!navigator.geolocation) {
-        document.getElementById('gps-status').innerText = '❌ GPS not supported';
-        return;
-      }
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          const lat = position.coords.latitude;
-          const lng = position.coords.longitude;
-          currentGPS = `${lat},${lng}`;
+          currentGPS = `${position.coords.latitude},${position.coords.longitude}`;
           document.getElementById('gps-status').innerText = `📍 Location Captured`;
           if (!localStorage.getItem("punchInGPS")) {
             localStorage.setItem("punchInGPS", currentGPS);
           }
         },
-        () => {
-          document.getElementById('gps-status').innerText = '❌ Unable to retrieve location';
-        }
+        () => document.getElementById('gps-status').innerText = '❌ Unable to get location'
       );
     }
 
@@ -77,21 +49,23 @@
       const empCode = localStorage.getItem("empCode");
       const location = currentGPS;
       const km = form.km.value;
+      const photoFile = form.photo.files[0];
 
-      if (!empCode || !location || !km) {
-        alert("❗ Please fill all fields and ensure GPS is available.");
+      if (!empCode || !location || !km || !photoFile) {
+        alert("Please fill all fields and attach photo.");
         return;
       }
 
-      const formData = new FormData();
-      formData.append("type", type);
-      formData.append("empCode", empCode);
-      formData.append("km", km);
-      formData.append("location", location);
+      const photoData = new FormData();
+      photoData.append("photo", photoFile);
+      photoData.append("type", type);
+      photoData.append("empCode", empCode);
+      photoData.append("km", km);
+      photoData.append("location", location);
 
       const response = await fetch("<?= ScriptApp.getService().getUrl() ?>", {
         method: "POST",
-        body: formData,
+        body: photoData,
       });
 
       if (type === "punchout") {
@@ -102,9 +76,7 @@
         const diff = Math.abs(manualKM - gpsKM);
 
         alert(`📏 Manual KM: ${manualKM}\n📍 GPS KM: ${gpsKM.toFixed(2)}\n🧾 Difference: ${diff.toFixed(2)} KM`);
-        if (diff > 10) {
-          alert("⚠️ Manual and GPS KM differ significantly!");
-        }
+        if (diff > 10) alert("⚠️ Manual and GPS KM differ significantly!");
       }
 
       alert("✅ Submitted Successfully");
@@ -112,7 +84,7 @@
     }
 
     function haversineDistance(lat1, lon1, lat2, lon2) {
-      const R = 6371; // Radius of Earth in KM
+      const R = 6371;
       const dLat = toRad(lat2 - lat1);
       const dLon = toRad(lon2 - lon1);
       const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
@@ -120,8 +92,8 @@
       return R * c;
     }
 
-    function toRad(deg) {
-      return deg * Math.PI / 180;
+    function toRad(x) {
+      return x * Math.PI / 180;
     }
   </script>
 </body>
