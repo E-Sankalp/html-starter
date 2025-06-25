@@ -22,7 +22,7 @@
       form.append("code", code);
       form.append("pass", pass);
 
-      const res = await fetch("<?= ScriptApp.getService().getUrl() ?>", {
+      const res = await fetch("https://script.google.com/macros/s/AKfycbyz_3uiEY1u-pszXKfXkRAPF_NQIk2PU0qu2eUAdKTKEWyiq4K22vwSfNtpbp0jFigMAg/exec", {
         method: "POST",
         body: form,
       });
