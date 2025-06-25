@@ -1,68 +1,63 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Punch In / Out</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      font-family: 'Segoe UI';
-      padding: 20px;
-      background: #e3f2fd;
-    }
-    h2 { color: #333; }
-    form {
-      background: white;
-      padding: 1rem;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      margin-bottom: 20px;
-    }
-    input, button {
-      display: block;
-      width: 100%;
-      margin-top: 10px;
-      padding: 10px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
-    button {
-      background: #007bff;
-      color: white;
-      border: none;
-    }
-  </style>
-</head>
-<body onload="getLocation()">
-  <h2>Punch In / Out</h2>
-  <form id="punchin">
-    <h3>Punch In</h3>
-    <input name="km" placeholder="Opening KM" required>
-    <button type="button" onclick="submitForm('punchin')">Punch In</button>
-  </form>
+<script>
+  let punchInGPS = "";
+  let currentGPS = "";
 
-  <form id="punchout">
-    <h3>Punch Out</h3>
-    <input name="km" placeholder="Closing KM" required>
-    <button type="button" onclick="submitForm('punchout')">Punch Out</button>
-  </form>
+  // Get current location
+  function getLocation() {
+    navigator.geolocation.getCurrentPosition(pos => {
+      currentGPS = `${pos.coords.latitude},${pos.coords.longitude}`;
+      if (!localStorage.getItem("punchInGPS")) {
+        localStorage.setItem("punchInGPS", currentGPS); // Save for Punch Out
+      }
+    });
+  }
 
-  <script>
-    let gps = "";
-    function getLocation() {
-      navigator.geolocation.getCurrentPosition(pos => {
-        gps = `${pos.coords.latitude},${pos.coords.longitude}`;
-      });
+  async function submitForm(type) {
+    const form = document.getElementById(type);
+    const formData = new FormData(form);
+    const empCode = localStorage.getItem("empCode");
+
+    let location = currentGPS;
+    if (type === "punchin") {
+      localStorage.setItem("punchInGPS", location);
     }
-    async function submitForm(type) {
-      const form = document.getElementById(type);
-      const formData = new FormData(form);
-      formData.append("type", type);
-      formData.append("location", gps);
-      formData.append("empCode", localStorage.getItem("empCode"));
-      await fetch("https://script.google.com/macros/s/AKfycbyz_3uiEY1u-pszXKfXkRAPF_NQIk2PU0qu2eUAdKTKEWyiq4K22vwSfNtpbp0jFigMAg/exec", { method: "POST", body: formData });
+
+    formData.append("type", type);
+    formData.append("empCode", empCode);
+    formData.append("location", location);
+
+    const res = await fetch("YOUR_SCRIPT_URL", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (type === "punchout") {
+      const outCoords = currentGPS.split(",").map(Number);
+      const inCoords = localStorage.getItem("punchInGPS").split(",").map(Number);
+      const gpsKM = haversineDistance(inCoords[0], inCoords[1], outCoords[0], outCoords[1]);
+      const manualKM = parseFloat(form.km.value);
+      const diff = Math.abs(gpsKM - manualKM);
+
+      alert(`📍 GPS KM: ${gpsKM.toFixed(2)} KM\n📏 Manual KM: ${manualKM} KM`);
+      if (diff > 10) {
+        alert("⚠️ Alert: GPS & Manual KM differ by more than 10 KM!");
+      }
+    } else {
       alert("Submitted");
-      form.reset();
     }
-  </script>
-</body>
-</html>
+
+    form.reset();
+  }
+
+  function haversineDistance(lat1, lon1, lat2, lon2) {
+    function toRad(x) { return x * Math.PI / 180; }
+    const R = 6371;
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a = Math.sin(dLat / 2) ** 2 +
+              Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+              Math.sin(dLon / 2) ** 2;
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
+</script>
