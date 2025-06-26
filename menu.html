@@ -82,7 +82,7 @@
         activityBtn.onclick = () => window.location.href = "activity.html";
         saleBtn.onclick = () => window.location.href = "sale.html";
 
-        if (userData.role === "") {
+        if (userData.role === "admin") {
           reportBtn.onclick = () => window.location.href = "report.html";
           reportBtn.style.display = "block";
         } else {
