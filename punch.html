@@ -3,29 +3,34 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>🕒 Punch In / Out</title>
+  <title>Punch In/Out - Sankalp Tracker</title>
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
       background: #f0f4f7;
-      padding: 30px;
-      max-width: 400px;
+      max-width: 450px;
       margin: auto;
-      text-align: center;
+      padding: 30px 20px;
     }
     h2 {
       color: #2f7b47;
-      margin-bottom: 30px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    label, input, button {
+      width: 100%;
+      margin: 12px 0;
+      padding: 12px;
+      font-size: 16px;
+    }
+    input[type="file"] {
+      padding: 0;
     }
     button {
-      width: 100%;
-      padding: 15px;
-      margin: 10px 0;
       background-color: #2f7b47;
       color: white;
       border: none;
       border-radius: 5px;
-      font-size: 16px;
       font-weight: bold;
       cursor: pointer;
     }
@@ -33,33 +38,36 @@
       background-color: #25663a;
     }
     #status {
-      margin-top: 10px;
-      color: #444;
+      color: #555;
+      text-align: center;
+      margin-bottom: 20px;
     }
   </style>
 </head>
 <body>
-  <h2>🕒 Punch In / Out</h2>
+  <h2>📍 Punch In / Out</h2>
+  <div id="status">Getting GPS...</div>
 
-  <button onclick="punch('in')">🔓 Punch In</button>
-  <button onclick="punch('out')">🔒 Punch Out</button>
+  <input type="file" id="photo" accept="image/*" />
+  <button id="punchInBtn">✅ Punch In</button>
+  <button id="punchOutBtn">🛑 Punch Out</button>
   <button onclick="window.location.href='menu.html'">🔙 Back to Menu</button>
-
-  <div id="status">📡 Waiting for location...</div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
-    import {
-      getAuth,
-      onAuthStateChanged
-    } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
     import {
       getFirestore,
-      doc,
       collection,
       addDoc,
       serverTimestamp
     } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
+    import {
+      getStorage,
+      ref,
+      uploadBytes,
+      getDownloadURL
+    } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-storage.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDIJWrLMbNAmNWqaaNfBYCV09K6T4m82yQ",
@@ -71,49 +79,54 @@
     };
 
     const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
     const auth = getAuth(app);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
 
-    let currentUser = null;
-    let gps = null;
+    let lat = null, lng = null;
+    const statusDiv = document.getElementById("status");
 
-    // Get GPS location
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        gps = {
-          lat: pos.coords.latitude,
-          lng: pos.coords.longitude
-        };
-        document.getElementById("status").innerText = "📍 Location captured";
-      },
-      () => {
-        document.getElementById("status").innerText = "❌ Location permission denied";
-      }
-    );
+    navigator.geolocation.getCurrentPosition(pos => {
+      lat = pos.coords.latitude;
+      lng = pos.coords.longitude;
+      statusDiv.textContent = `📍 Location: ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+    }, err => {
+      statusDiv.textContent = "❌ Could not fetch location.";
+    });
+
+    const uploadPhotoAndGetURL = async (file, uid) => {
+      const photoRef = ref(storage, `punch_photos/${uid}_${Date.now()}.jpg`);
+      await uploadBytes(photoRef, file);
+      return await getDownloadURL(photoRef);
+    };
+
+    const submitPunch = async (type) => {
+      const file = document.getElementById("photo").files[0];
+      if (!lat || !lng) return alert("📍 Location not yet available.");
+      if (!file) return alert("📷 Please attach a photo.");
+
+      const user = auth.currentUser;
+      const photoURL = await uploadPhotoAndGetURL(file, user.uid);
+
+      await addDoc(collection(db, `punches/${user.uid}/records`), {
+        type,
+        timestamp: serverTimestamp(),
+        photo: photoURL,
+        location: { lat, lng }
+      });
+
+      alert(`✅ ${type} Successful`);
+      document.getElementById("photo").value = "";
+    };
+
+    document.getElementById("punchInBtn").onclick = () => submitPunch("in");
+    document.getElementById("punchOutBtn").onclick = () => submitPunch("out");
 
     onAuthStateChanged(auth, user => {
       if (!user) {
         window.location.href = "login.html";
-      } else {
-        currentUser = user;
       }
     });
-
-    async function punch(type) {
-      if (!currentUser || !gps) {
-        alert("Login or location missing.");
-        return;
-      }
-
-      const logRef = collection(db, `punches/${currentUser.uid}/logs`);
-      await addDoc(logRef, {
-        type,
-        location: gps,
-        timestamp: serverTimestamp()
-      });
-
-      alert(`✅ Punch ${type.toUpperCase()} successful.`);
-    }
   </script>
 </body>
 </html>
