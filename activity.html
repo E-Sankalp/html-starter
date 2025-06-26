@@ -1,66 +1,79 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Daily Activity</title>
+  <title>📝 Activity Log - Sankalp Tracker</title>
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
       background: #f0f4f7;
-      padding: 30px;
-      max-width: 400px;
+      max-width: 450px;
       margin: auto;
+      padding: 30px 20px;
     }
-    h2 { text-align: center; color: #2f7b47; }
-    input, textarea, button {
-      display: block;
+    h2 {
+      color: #2f7b47;
+      text-align: center;
+    }
+    label, input, textarea, button {
       width: 100%;
       margin: 10px 0;
-      padding: 12px;
+      padding: 10px;
       font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
+    }
+    input[type="file"] {
+      padding: 0;
     }
     button {
       background-color: #2f7b47;
       color: white;
+      border: none;
       font-weight: bold;
+      border-radius: 5px;
       cursor: pointer;
     }
-    #status {
-      text-align: center;
-      font-size: 14px;
-      color: #555;
-      margin-bottom: 10px;
+    button:hover {
+      background-color: #25663a;
     }
-    #status small {
-      font-size: 12px;
-      display: block;
-      margin-top: 4px;
-      color: #333;
+    #status {
+      color: #444;
+      text-align: center;
+      margin-bottom: 15px;
     }
   </style>
 </head>
-<body onload="getLocation()">
-  <h2>📝 Daily Activity</h2>
-  <div id="status">📍 Waiting for GPS...</div>
+<body>
+  <h2>📝 Log Farmer Visit</h2>
+  <div id="status">📡 Getting GPS...</div>
+
   <form id="activityForm">
-    <input type="text" name="customerName" placeholder="Customer Name" required>
-    <input type="tel" name="mobile" placeholder="Mobile Number" pattern="[0-9]{10}" required>
-    <textarea name="whatWentWell" placeholder="What went well?" required></textarea>
-    <textarea name="needsImprovement" placeholder="What needs improvement?" required></textarea>
-    <textarea name="supportRequired" placeholder="Support Required?" required></textarea>
-    <textarea name="remarks" placeholder="Remarks (if any)"></textarea>
-    <input type="number" name="orderAmount" placeholder="Order Amount (₹)">
-    <input type="file" id="photo" accept="image/*" capture="environment" />
-    <button type="button" onclick="submitActivity()">Submit</button>
+    <input type="text" id="customer" placeholder="Customer Name" required />
+    <textarea id="well" placeholder="What went well?" required></textarea>
+    <textarea id="improve" placeholder="What needs improvement?" required></textarea>
+    <textarea id="support" placeholder="Support required?" required></textarea>
+    <textarea id="remarks" placeholder="Any other remarks (optional)"></textarea>
+    <label>Upload Visit Photo:</label>
+    <input type="file" id="photo" accept="image/*" required />
+    <button type="submit">✅ Submit Activity</button>
     <button type="button" onclick="window.location.href='menu.html'">🔙 Back to Menu</button>
   </form>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
+    import {
+      getStorage,
+      ref,
+      uploadBytes,
+      getDownloadURL
+    } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-storage.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDIJWrLMbNAmNWqaaNfBYCV09K6T4m82yQ",
@@ -68,69 +81,66 @@
       projectId: "sankalp-tracker",
       storageBucket: "sankalp-tracker.appspot.com",
       messagingSenderId: "795190822544",
-      appId: "1:795190822544:web:cf5b9dd4f083ba2c76fa15",
-      measurementId: "G-4FPP8QQC8N"
+      appId: "1:795190822544:web:cf5b9dd4f083ba2c76fa15"
     };
 
     const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
     const db = getFirestore(app);
+    const storage = getStorage(app);
 
-    let gps = null;
+    let lat = null, lng = null;
+    const statusDiv = document.getElementById("status");
 
-    function getLocation() {
-      document.getElementById("status").textContent = "📡 Getting GPS...";
+    navigator.geolocation.getCurrentPosition(pos => {
+      lat = pos.coords.latitude;
+      lng = pos.coords.longitude;
+      statusDiv.textContent = `📍 Location: ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+    }, err => {
+      statusDiv.textContent = "❌ Could not fetch location.";
+    });
 
-      if (!navigator.geolocation) {
-        document.getElementById("status").textContent = "❌ GPS not supported";
-        return;
-      }
-
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          gps = {
-            lat: pos.coords.latitude.toFixed(6),
-            lng: pos.coords.longitude.toFixed(6),
-            accuracy: pos.coords.accuracy
-          };
-          document.getElementById("status").innerHTML =
-            `📍 GPS Captured<br><small>Lat: ${gps.lat}, Lng: ${gps.lng}, ±${Math.round(gps.accuracy)}m</small>`;
-        },
-        (err) => {
-          const msg = err.code === 1 ? "❌ Permission denied" :
-                      err.code === 2 ? "❌ Position unavailable" :
-                      err.code === 3 ? "❌ Timeout" : "❌ GPS error";
-          document.getElementById("status").innerHTML =
-            msg + '<br><button onclick="getLocation()">🔁 Retry</button>';
-        },
-        {
-          enableHighAccuracy: true,
-          timeout: 10000,
-          maximumAge: 60000
-        }
-      );
-    }
-
-    window.submitActivity = async function () {
-      const uid = localStorage.getItem("uid");
-      const form = document.getElementById("activityForm");
-      const data = Object.fromEntries(new FormData(form).entries());
-      if (!uid || !gps) return alert("❌ UID or GPS missing.");
-
-      try {
-        await addDoc(collection(db, "activities", uid, "activityLogs"), {
-          ...data,
-          mobile: data.mobile,
-          orderAmount: Number(data.orderAmount || 0),
-          location: gps,
-          timestamp: serverTimestamp()
-        });
-        alert("✅ Activity Submitted!");
-        form.reset();
-        getLocation();
-      } catch (e) {
-        alert("❌ Submission failed: " + e.message);
-      }
+    const uploadPhotoAndGetURL = async (file, uid) => {
+      const photoRef = ref(storage, `activity_photos/${uid}_${Date.now()}.jpg`);
+      await uploadBytes(photoRef, file);
+      return await getDownloadURL(photoRef);
     };
+
+    document.getElementById("activityForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const user = auth.currentUser;
+      if (!user) return alert("Please log in again.");
+
+      const customer = document.getElementById("customer").value;
+      const well = document.getElementById("well").value;
+      const improve = document.getElementById("improve").value;
+      const support = document.getElementById("support").value;
+      const remarks = document.getElementById("remarks").value;
+      const file = document.getElementById("photo").files[0];
+
+      if (!lat || !lng) return alert("📍 Location not available.");
+      if (!file) return alert("📷 Please upload a photo.");
+
+      const photoURL = await uploadPhotoAndGetURL(file, user.uid);
+
+      await addDoc(collection(db, `activities/${user.uid}/visits`), {
+        customer,
+        well,
+        improve,
+        support,
+        remarks,
+        photo: photoURL,
+        location: { lat, lng },
+        timestamp: serverTimestamp()
+      });
+
+      alert("✅ Activity submitted");
+      e.target.reset();
+    });
+
+    onAuthStateChanged(auth, user => {
+      if (!user) window.location.href = "login.html";
+    });
   </script>
 </body>
 </html>
