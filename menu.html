@@ -1,83 +1,89 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Dashboard | Sankalp</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sankalp Tracker - Menu</title>
   <style>
-    * { box-sizing: border-box; }
     body {
       font-family: 'Segoe UI', sans-serif;
-      margin: 0;
-      padding: 0;
       background: #f0f4f7;
-      color: #333;
-    }
-    .container {
-      max-width: 500px;
+      padding: 30px;
+      max-width: 400px;
       margin: auto;
-      padding: 20px;
+      text-align: center;
     }
     h2 {
-      text-align: center;
       color: #2f7b47;
-      margin-bottom: 20px;
+      margin-bottom: 30px;
     }
-    .btn {
-      display: block;
+    button {
       width: 100%;
-      padding: 16px;
-      margin: 12px 0;
-      font-size: 18px;
-      text-align: center;
-      background: #2f7b47;
+      padding: 15px;
+      margin: 10px 0;
+      background-color: #2f7b47;
       color: white;
-      text-decoration: none;
-      border-radius: 10px;
-      font-weight: bold;
-      transition: background 0.3s;
-    }
-    .btn:hover {
-      background: #25663a;
-    }
-    .logout {
-      background: #b91c1c;
-    }
-    .logout:hover {
-      background: #991b1b;
-    }
-    #welcome {
-      text-align: center;
+      border: none;
+      border-radius: 5px;
       font-size: 16px;
-      margin-bottom: 10px;
-      color: #333;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #25663a;
+    }
+    #empInfo {
+      margin-top: 20px;
+      font-size: 14px;
+      color: #444;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h2>👋 Welcome to Sankalp Tracker</h2>
-    <div id="welcome">Loading...</div>
+  <h2>📋 Sankalp Tracker Menu</h2>
 
-    <a class="btn" href="punch.html">📍 Punch In / Out</a>
-    <a class="btn" href="activity.html">📝 Activity Reporting</a>
-    <a class="btn" href="sale.html">📦 Sale Entry</a>
-    <a class="btn logout" href="#" onclick="logout()">🚪 Logout</a>
-  </div>
+  <button onclick="navigate('punch.html')">🕒 Punch In / Out</button>
+  <button onclick="navigate('activity.html')">📍 Log Activity</button>
+  <button onclick="navigate('sale.html')">💼 Sales Entry</button>
+  <button onclick="navigate('report.html')">📊 My Report</button>
+  <button onclick="logout()">🚪 Logout</button>
 
-  <script>
-    const empCode = localStorage.getItem("empCode");
-    if (!empCode) {
-      alert("Please login again");
-      window.location.href = "login.html";
-    } else {
-      document.getElementById("welcome").innerText = "Logged in as: " + empCode;
+  <div id="empInfo"></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+    import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDIJWrLMbNAmNWqaaNfBYCV09K6T4m82yQ",
+      authDomain: "sankalp-tracker.firebaseapp.com",
+      projectId: "sankalp-tracker",
+      storageBucket: "sankalp-tracker.appspot.com",
+      messagingSenderId: "795190822544",
+      appId: "1:795190822544:web:cf5b9dd4f083ba2c76fa15"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    function navigate(page) {
+      window.location.href = page;
     }
 
     function logout() {
-      localStorage.clear();
-      window.location.href = "login.html";
+      signOut(auth).then(() => {
+        alert("Logged out");
+        window.location.href = "login.html";
+      });
     }
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        document.getElementById("empInfo").innerText = `👤 Logged in as: ${user.email}`;
+      } else {
+        window.location.href = "login.html";
+      }
+    });
   </script>
 </body>
 </html>
