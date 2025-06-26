@@ -122,7 +122,7 @@
     document.getElementById("activityForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const user = auth.currentUser;
-      if (!user) return alert("Please log in again.");
+      if (!user) return alert("❌ Please log in again.");
 
       const type = document.getElementById("type").value;
       const customer = document.getElementById("customer").value;
@@ -136,22 +136,27 @@
       if (!type) return alert("Please select activity type.");
       if (!file) return alert("📷 Please upload a photo.");
 
-      const photoURL = await uploadPhotoAndGetURL(file, user.uid);
+      try {
+        const photoURL = await uploadPhotoAndGetURL(file, user.uid);
 
-      await addDoc(collection(db, `activities/${user.uid}/visits`), {
-        type,
-        customer,
-        well,
-        improve,
-        support,
-        remarks,
-        photo: photoURL,
-        location: { lat, lng },
-        timestamp: serverTimestamp()
-      });
+        await addDoc(collection(db, `activities/${user.uid}/visits`), {
+          type,
+          customer,
+          well,
+          improve,
+          support,
+          remarks,
+          photo: photoURL,
+          location: { lat, lng },
+          timestamp: serverTimestamp()
+        });
 
-      alert("✅ Activity submitted");
-      e.target.reset();
+        alert("✅ Activity submitted successfully");
+        e.target.reset();
+      } catch (err) {
+        console.error("❌ Submission error:", err);
+        alert("❌ Error: " + err.message);
+      }
     });
 
     onAuthStateChanged(auth, user => {
