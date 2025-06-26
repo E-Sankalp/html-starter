@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>📊 Admin Report</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f4f7;
+      padding: 20px;
+      max-width: 900px;
+      margin: auto;
+    }
+    h2 {
+      color: #2f7b47;
+      text-align: center;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      font-size: 14px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background-color: #2f7b47;
+      color: white;
+    }
+    button {
+      background-color: #2f7b47;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      margin-top: 10px;
+      border-radius: 4px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #25663a;
+    }
+  </style>
+</head>
+<body>
+  <h2>📊 Employee Activity & Distance Report</h2>
+  <div>
+    <label for="dateFilter">Filter by Date:</label>
+    <input type="date" id="dateFilter" />
+    <button onclick="loadData()">🔄 Load</button>
+    <button onclick="exportCSV()">📤 Export CSV</button>
+  </div>
+  <table id="reportTable">
+    <thead>
+      <tr>
+        <th>Email</th>
+        <th>Customer</th>
+        <th>Activity</th>
+        <th>Order</th>
+        <th>Remarks</th>
+        <th>Lat</th>
+        <th>Lng</th>
+        <th>Time</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+    import {
+      getAuth,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
+    import {
+      getFirestore,
+      collectionGroup,
+      query,
+      where,
+      getDocs
+    } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDIJWrLMbNAmNWqaaNfBYCV09K6T4m82yQ",
+      authDomain: "sankalp-tracker.firebaseapp.com",
+      projectId: "sankalp-tracker",
+      storageBucket: "sankalp-tracker.appspot.com",
+      messagingSenderId: "795190822544",
+      appId: "1:795190822544:web:cf5b9dd4f083ba2c76fa15"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    function formatDate(ts) {
+      const d = ts.toDate();
+      return `${d.toLocaleDateString()} ${d.toLocaleTimeString()}`;
+    }
+
+    function getDistance(lat1, lon1, lat2, lon2) {
+      const R = 6371;
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1 * Math.PI / 180) *
+        Math.cos(lat2 * Math.PI / 180) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
+    }
+
+    let reportData = [];
+
+    async function loadData() {
+      const tbody = document.querySelector("#reportTable tbody");
+      tbody.innerHTML = "";
+      reportData = [];
+
+      const selectedDate = document.getElementById("dateFilter").value;
+      if (!selectedDate) {
+        alert("Please select a date");
+        return;
+      }
+
+      const allDocs = await getDocs(collectionGroup(db, "activityLogs"));
+
+      allDocs.forEach(docSnap => {
+        const d = docSnap.data();
+        const date = d.timestamp?.toDate()?.toISOString()?.slice(0, 10);
+        if (date === selectedDate) {
+          const row = {
+            email: docSnap.ref.path.split("/")[1],
+            customer: d.customer || "",
+            activity: d.activityType || "",
+            order: d.orderAmount || "",
+            remarks: d.remarks || "",
+            lat: d.location?.lat || "",
+            lng: d.location?.lng || "",
+            time: d.timestamp
+          };
+          reportData.push(row);
+        }
+      });
+
+      reportData.forEach(r => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${r.email}</td>
+          <td>${r.customer}</td>
+          <td>${r.activity}</td>
+          <td>${r.order}</td>
+          <td>${r.remarks}</td>
+          <td>${r.lat}</td>
+          <td>${r.lng}</td>
+          <td>${formatDate(r.time)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function exportCSV() {
+      if (reportData.length === 0) {
+        alert("No data to export");
+        return;
+      }
+
+      const header = Object.keys(reportData[0]);
+      const rows = reportData.map(obj => header.map(field => `"${obj[field] || ""}"`).join(","));
+      const csvContent = [header.join(","), ...rows].join("\n");
+
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", "employee_report.csv");
+      link.click();
+    }
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = "login.html";
+        return;
+      }
+
+      const token = await user.getIdTokenResult();
+      if (!token.claims.admin) {
+        alert("Access denied. Admin only.");
+        window.location.href = "menu.html";
+      }
+    });
+  </script>
+</body>
+</html>
+
