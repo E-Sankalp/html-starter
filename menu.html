@@ -43,10 +43,10 @@
   <button id="reportBtn">📊 View Reports</button>
   <button id="logoutBtn">🚪 Logout</button>
 
-  <!-- Firebase script module -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
+    import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDIJWrLMbNAmNWqaaNfBYCV09K6T4m82yQ",
@@ -59,31 +59,43 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
+    const db = getFirestore(app);
 
-    window.onload = () => {
+    window.onload = async () => {
       const punchBtn = document.getElementById("punchBtn");
       const activityBtn = document.getElementById("activityBtn");
       const saleBtn = document.getElementById("saleBtn");
       const reportBtn = document.getElementById("reportBtn");
       const logoutBtn = document.getElementById("logoutBtn");
 
-      punchBtn.onclick = () => window.location.href = "punch.html";
-      activityBtn.onclick = () => window.location.href = "activity.html";
-      saleBtn.onclick = () => window.location.href = "sale.html";
-      reportBtn.onclick = () => window.location.href = "report.html";
-      logoutBtn.onclick = () => {
-        signOut(auth).then(() => {
-          window.location.href = "index.html";
-        });
-      };
-    };
+      onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+          window.location.href = "login.html";
+          return;
+        }
 
-    // Auth check
-    onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        window.location.href = "index.html";
-      }
-    });
+        const userRef = doc(db, "users", user.uid);
+        const userSnap = await getDoc(userRef);
+        const userData = userSnap.exists() ? userSnap.data() : {};
+
+        punchBtn.onclick = () => window.location.href = "punch.html";
+        activityBtn.onclick = () => window.location.href = "activity.html";
+        saleBtn.onclick = () => window.location.href = "sale.html";
+
+        if (userData.role === "admin") {
+          reportBtn.onclick = () => window.location.href = "report.html";
+          reportBtn.style.display = "block";
+        } else {
+          reportBtn.style.display = "none";
+        }
+
+        logoutBtn.onclick = () => {
+          signOut(auth).then(() => {
+            window.location.href = "login.html";
+          });
+        };
+      });
+    };
   </script>
 </body>
 </html>
