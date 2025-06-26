@@ -16,7 +16,7 @@
       color: #2f7b47;
       text-align: center;
     }
-    label, input, textarea, button {
+    label, input, select, textarea, button {
       width: 100%;
       margin: 10px 0;
       padding: 10px;
@@ -44,17 +44,30 @@
   </style>
 </head>
 <body>
-  <h2>📝 Log Farmer Visit</h2>
+  <h2>📝 Log Activity</h2>
   <div id="status">📡 Getting GPS...</div>
 
   <form id="activityForm">
+    <label for="type">Activity Type</label>
+    <select id="type" required>
+      <option value="">Select Activity</option>
+      <option value="Farmer Visit">Farmer Visit</option>
+      <option value="Dealer Visit">Dealer Visit</option>
+      <option value="Demo">Demo</option>
+      <option value="Retailer Training">Retailer Training</option>
+      <option value="Meeting">Meeting</option>
+      <option value="Other">Other</option>
+    </select>
+
     <input type="text" id="customer" placeholder="Customer Name" required />
     <textarea id="well" placeholder="What went well?" required></textarea>
     <textarea id="improve" placeholder="What needs improvement?" required></textarea>
     <textarea id="support" placeholder="Support required?" required></textarea>
     <textarea id="remarks" placeholder="Any other remarks (optional)"></textarea>
+
     <label>Upload Visit Photo:</label>
     <input type="file" id="photo" accept="image/*" required />
+
     <button type="submit">✅ Submit Activity</button>
     <button type="button" onclick="window.location.href='menu.html'">🔙 Back to Menu</button>
   </form>
@@ -111,6 +124,7 @@
       const user = auth.currentUser;
       if (!user) return alert("Please log in again.");
 
+      const type = document.getElementById("type").value;
       const customer = document.getElementById("customer").value;
       const well = document.getElementById("well").value;
       const improve = document.getElementById("improve").value;
@@ -119,11 +133,13 @@
       const file = document.getElementById("photo").files[0];
 
       if (!lat || !lng) return alert("📍 Location not available.");
+      if (!type) return alert("Please select activity type.");
       if (!file) return alert("📷 Please upload a photo.");
 
       const photoURL = await uploadPhotoAndGetURL(file, user.uid);
 
       await addDoc(collection(db, `activities/${user.uid}/visits`), {
+        type,
         customer,
         well,
         improve,
