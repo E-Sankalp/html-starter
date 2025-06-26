@@ -1,124 +1,102 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Sale Entry | Sankalp</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>💼 Sales Entry</title>
   <style>
-    * { box-sizing: border-box; }
     body {
       font-family: 'Segoe UI', sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #f2f5f7;
-      color: #333;
-    }
-    .container {
-      padding: 20px;
-      max-width: 500px;
-      margin: 0 auto;
+      background: #f0f4f7;
+      padding: 30px;
+      max-width: 400px;
+      margin: auto;
     }
     h2 {
       text-align: center;
       color: #2f7b47;
       margin-bottom: 20px;
     }
-    form {
-      background: #fff;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    }
     input, textarea, button {
       width: 100%;
-      padding: 14px;
+      padding: 12px;
       margin: 10px 0;
       font-size: 16px;
+      border-radius: 4px;
       border: 1px solid #ccc;
-      border-radius: 8px;
-      font-family: inherit;
     }
     button {
-      background: #2f7b47;
+      background-color: #2f7b47;
       color: white;
-      font-weight: bold;
       border: none;
+      font-weight: bold;
       cursor: pointer;
-      transition: background 0.3s;
     }
     button:hover {
-      background: #25663a;
-    }
-    #gps-status {
-      text-align: center;
-      color: #2f7b47;
-      margin-bottom: 10px;
-    }
-    @media (max-width: 480px) {
-      body, .container { padding: 10px; }
-      input, textarea, button { font-size: 15px; padding: 12px; }
+      background-color: #25663a;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h2>📦 Sale Entry</h2>
-    <div id="gps-status">📡 Locating GPS...</div>
+  <h2>💼 Sales Entry</h2>
 
-    <form id="saleForm">
-      <input type="number" name="cpcSale" placeholder="CPC Sale Amount (₹)">
-      <input type="number" name="sndSale" placeholder="SND Sale Amount (₹)">
-      <input type="number" name="seedSale" placeholder="SEED Sale Amount (₹)">
-      <input type="number" name="vetSale" placeholder="VET Sale Amount (₹)">
-      <input type="number" name="feqSale" placeholder="FEQ Sale Amount (₹)">
-      <textarea name="remarks" placeholder="Remarks (optional)"></textarea>
+  <form id="saleForm">
+    <input type="number" name="cpc" placeholder="CPC Sale (Qty)">
+    <input type="number" name="snd" placeholder="SND Sale (Qty)">
+    <input type="number" name="seed" placeholder="SEED Sale (Qty)">
+    <input type="number" name="vet" placeholder="VET Sale (Qty)">
+    <input type="number" name="feq" placeholder="FEQ Sale (Qty)">
+    <textarea name="remarks" placeholder="Remarks"></textarea>
+    <input type="number" name="orderAmount" placeholder="₹ Order Amount (optional)">
+    <button type="button" onclick="submitSale()">📤 Submit</button>
+    <button type="button" onclick="window.location.href='menu.html'">🔙 Back to Menu</button>
+  </form>
 
-      <button type="button" onclick="submitSale()">Submit Sale</button>
-    </form>
-  </div>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+    import {
+      getAuth,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
 
-  <script>
-    let currentGPS = "";
+    const firebaseConfig = {
+      apiKey: "AIzaSyDIJWrLMbNAmNWqaaNfBYCV09K6T4m82yQ",
+      authDomain: "sankalp-tracker.firebaseapp.com",
+      projectId: "sankalp-tracker",
+      storageBucket: "sankalp-tracker.appspot.com",
+      messagingSenderId: "795190822544",
+      appId: "1:795190822544:web:cf5b9dd4f083ba2c76fa15"
+    };
 
-    function getLocation() {
-      if (!navigator.geolocation) {
-        document.getElementById('gps-status').innerText = '❌ GPS not supported';
-        return;
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    let currentUser = null;
+
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        window.location.href = "login.html";
+      } else {
+        currentUser = user;
       }
-      navigator.geolocation.getCurrentPosition(
-        pos => {
-          currentGPS = `${pos.coords.latitude},${pos.coords.longitude}`;
-          document.getElementById('gps-status').innerText = '📍 Location captured';
-        },
-        err => {
-          document.getElementById('gps-status').innerText = '❌ Unable to fetch GPS';
-        }
-      );
-    }
+    });
 
     async function submitSale() {
-      const empCode = localStorage.getItem("empCode");
-      if (!empCode || !currentGPS) {
-        return alert("❗ Missing employee code or GPS location.");
-      }
-
       const form = document.getElementById("saleForm");
-      const formData = new FormData(form);
-      formData.append("type", "sale");
-      formData.append("empCode", empCode);
-      formData.append("location", currentGPS);
+      const data = Object.fromEntries(new FormData(form).entries());
+      data.timestamp = serverTimestamp();
 
-      const res = await fetch("https://script.google.com/macros/s/AKfycbzemJVUlSXwcTnh09SlsrIfpq_-2r-a5O-9eydzTthp0xVGjW9uezw1R2uyN2zzDO5p3Q/exec", {
-        method: "POST",
-        body: formData
-      });
-
-      const text = await res.text();
-      alert(text);
+      await addDoc(collection(db, `sales/${currentUser.uid}/salesLogs`), data);
+      alert("✅ Sales entry submitted");
       form.reset();
     }
-
-    window.onload = getLocation;
   </script>
 </body>
 </html>
