@@ -3,31 +3,31 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Sankalp Login</title>
+  <title>Login - Sankalp Tracker</title>
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
       background: #f0f4f7;
-      padding: 30px;
       max-width: 400px;
       margin: auto;
+      padding: 40px 20px;
     }
     h2 {
       text-align: center;
       color: #2f7b47;
     }
     input, button {
-      display: block;
       width: 100%;
-      margin: 10px 0;
       padding: 12px;
+      margin: 12px 0;
       font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
     }
     button {
       background-color: #2f7b47;
       color: white;
       border: none;
-      border-radius: 5px;
       font-weight: bold;
       cursor: pointer;
     }
@@ -37,14 +37,15 @@
   </style>
 </head>
 <body>
-  <h2>🔐 Sankalp Login</h2>
-  <input type="email" id="email" placeholder="Email" />
-  <input type="password" id="password" placeholder="Password" />
-  <button onclick="login()">Login</button>
+  <h2>🔐 Login</h2>
+
+  <input type="email" id="email" placeholder="Email" required />
+  <input type="password" id="password" placeholder="Password" required />
+  <button onclick="login()">➡️ Login</button>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
+    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDIJWrLMbNAmNWqaaNfBYCV09K6T4m82yQ",
@@ -58,30 +59,23 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
 
-    window.login = () => {
-      const email = document.getElementById("email").value;
-      const pass = document.getElementById("password").value;
+    window.login = function () {
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value.trim();
 
-      signInWithEmailAndPassword(auth, email, pass)
+      if (!email || !password) {
+        alert("Please enter both email and password.");
+        return;
+      }
+
+      signInWithEmailAndPassword(auth, email, password)
         .then(() => {
-          // login successful
+          window.location.href = "menu.html";
         })
         .catch((error) => {
-          alert("Login Failed: " + error.message);
+          alert("❌ Login failed: " + error.message);
         });
-    };
-
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        const token = await user.getIdTokenResult();
-        if (token.claims.admin) {
-          window.location.href = "report.html";
-        } else {
-          window.location.href = "menu.html";
-        }
-      }
-    });
+    }
   </script>
 </body>
 </html>
-
