@@ -1,104 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Login | Sankalp Tracker</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sankalp Login</title>
   <style>
-    * {
-      box-sizing: border-box;
-    }
     body {
       font-family: 'Segoe UI', sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #f2f5f7;
-      color: #333;
-    }
-    .container {
-      padding: 20px;
-      max-width: 450px;
-      margin: 0 auto;
+      background: #f0f4f7;
+      padding: 30px;
+      max-width: 400px;
+      margin: auto;
     }
     h2 {
       text-align: center;
       color: #2f7b47;
-      margin-bottom: 30px;
-    }
-    form {
-      background: #fff;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     }
     input, button {
+      display: block;
       width: 100%;
-      padding: 14px;
-      margin: 12px 0;
+      margin: 10px 0;
+      padding: 12px;
       font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      font-family: inherit;
     }
     button {
-      background: #2f7b47;
+      background-color: #2f7b47;
       color: white;
-      font-weight: bold;
       border: none;
+      border-radius: 5px;
+      font-weight: bold;
       cursor: pointer;
-      transition: background 0.3s;
     }
     button:hover {
-      background: #25663a;
-    }
-    @media (max-width: 480px) {
-      body {
-        padding: 10px;
-      }
-      .container {
-        padding: 10px;
-      }
-      input, button {
-        padding: 12px;
-        font-size: 15px;
-      }
+      background-color: #25663a;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h2>🔐 Sankalp Login</h2>
-    <form>
-      <input id="empCode" placeholder="Employee Code" required>
-      <input id="password" type="password" placeholder="Password" required>
-      <button type="button" onclick="login()">Login</button>
-    </form>
-  </div>
+  <h2>🔐 Sankalp Login</h2>
+  <input type="email" id="email" placeholder="Email" />
+  <input type="password" id="password" placeholder="Password" />
+  <button onclick="login()">Login</button>
 
-  <script>
-    async function login() {
-      const empCode = document.getElementById("empCode").value.trim();
-      const password = document.getElementById("password").value.trim();
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
 
-      const formData = new URLSearchParams();
-      formData.append("type", "login");
-      formData.append("empCode", empCode);
-      formData.append("password", password);
+    const firebaseConfig = {
+      apiKey: "AIzaSyDIJWrLMbNAmNWqaaNfBYCV09K6T4m82yQ",
+      authDomain: "sankalp-tracker.firebaseapp.com",
+      projectId: "sankalp-tracker",
+      storageBucket: "sankalp-tracker.appspot.com",
+      messagingSenderId: "795190822544",
+      appId: "1:795190822544:web:cf5b9dd4f083ba2c76fa15"
+    };
 
-      const res = await fetch("https://script.google.com/macros/s/AKfycbzemJVUlSXwcTnh09SlsrIfpq_-2r-a5O-9eydzTthp0xVGjW9uezw1R2uyN2zzDO5p3Q/exec", {
-        method: "POST",
-        body: formData
-      });
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
 
-      const data = await res.json();
-      if (data.success) {
-        alert("✅ Welcome " + data.empName);
-        localStorage.setItem("empCode", empCode);
-        window.location.href = "menu.html";
-      } else {
-        alert("❌ Invalid login. Please try again.");
+    window.login = () => {
+      const email = document.getElementById("email").value;
+      const pass = document.getElementById("password").value;
+
+      signInWithEmailAndPassword(auth, email, pass)
+        .then(() => {
+          // login successful
+        })
+        .catch((error) => {
+          alert("Login Failed: " + error.message);
+        });
+    };
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const token = await user.getIdTokenResult();
+        if (token.claims.admin) {
+          window.location.href = "report.html";
+        } else {
+          window.location.href = "menu.html";
+        }
       }
-    }
+    });
   </script>
 </body>
 </html>
+
