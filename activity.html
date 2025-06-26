@@ -1,138 +1,136 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Activity Report | Sankalp</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Daily Activity</title>
   <style>
-    * { box-sizing: border-box; }
     body {
       font-family: 'Segoe UI', sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #f2f5f7;
-      color: #333;
+      background: #f0f4f7;
+      padding: 30px;
+      max-width: 400px;
+      margin: auto;
     }
-    .container {
-      padding: 20px;
-      max-width: 500px;
-      margin: 0 auto;
-    }
-    h2 {
-      text-align: center;
-      color: #2f7b47;
-      margin-bottom: 20px;
-    }
-    form {
-      background: #fff;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    }
-    input, select, textarea, button {
+    h2 { text-align: center; color: #2f7b47; }
+    input, textarea, button {
+      display: block;
       width: 100%;
-      padding: 14px;
       margin: 10px 0;
+      padding: 12px;
       font-size: 16px;
       border: 1px solid #ccc;
-      border-radius: 8px;
-      font-family: inherit;
+      border-radius: 4px;
     }
     button {
-      background: #2f7b47;
+      background-color: #2f7b47;
       color: white;
       font-weight: bold;
-      border: none;
       cursor: pointer;
-      transition: background 0.3s;
     }
-    button:hover {
-      background: #25663a;
-    }
-    #gps-status {
+    #status {
       text-align: center;
-      color: #2f7b47;
+      font-size: 14px;
+      color: #555;
       margin-bottom: 10px;
     }
-    @media (max-width: 480px) {
-      body, .container { padding: 10px; }
-      input, textarea, button { font-size: 15px; padding: 12px; }
+    #status small {
+      font-size: 12px;
+      display: block;
+      margin-top: 4px;
+      color: #333;
     }
   </style>
 </head>
-<body>
-  <div class="container">
-    <h2>📋 Activity Reporting</h2>
-    <div id="gps-status">📡 Locating GPS...</div>
+<body onload="getLocation()">
+  <h2>📝 Daily Activity</h2>
+  <div id="status">📍 Waiting for GPS...</div>
+  <form id="activityForm">
+    <input type="text" name="customerName" placeholder="Customer Name" required>
+    <input type="tel" name="mobile" placeholder="Mobile Number" pattern="[0-9]{10}" required>
+    <textarea name="whatWentWell" placeholder="What went well?" required></textarea>
+    <textarea name="needsImprovement" placeholder="What needs improvement?" required></textarea>
+    <textarea name="supportRequired" placeholder="Support Required?" required></textarea>
+    <textarea name="remarks" placeholder="Remarks (if any)"></textarea>
+    <input type="number" name="orderAmount" placeholder="Order Amount (₹)">
+    <input type="file" id="photo" accept="image/*" capture="environment" />
+    <button type="button" onclick="submitActivity()">Submit</button>
+    <button type="button" onclick="window.location.href='menu.html'">🔙 Back to Menu</button>
+  </form>
 
-    <form id="activityForm">
-      <select name="activityType" required>
-        <option value="">Select Activity Type</option>
-        <option>Farmer Visit</option>
-        <option>Demo</option>
-        <option>Dealer Visit</option>
-        <option>Other</option>
-      </select>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
 
-      <input name="customer" placeholder="Customer / Farmer Name" required>
-      <input name="mobile" placeholder="Mobile Number (10 digits)" pattern="^[6-9][0-9]{9}$" maxlength="10">
-      
-      <textarea name="whatWentWell" placeholder="What went well"></textarea>
-      <textarea name="needsImprovement" placeholder="What needs improvement"></textarea>
-      <textarea name="supportRequired" placeholder="Support required"></textarea>
-      <textarea name="remarks" placeholder="Additional Remarks"></textarea>
-      <input type="number" name="orderAmount" placeholder="Order Amount (₹ if any)">
+    const firebaseConfig = {
+      apiKey: "AIzaSyDIJWrLMbNAmNWqaaNfBYCV09K6T4m82yQ",
+      authDomain: "sankalp-tracker.firebaseapp.com",
+      projectId: "sankalp-tracker",
+      storageBucket: "sankalp-tracker.appspot.com",
+      messagingSenderId: "795190822544",
+      appId: "1:795190822544:web:cf5b9dd4f083ba2c76fa15",
+      measurementId: "G-4FPP8QQC8N"
+    };
 
-      <button type="button" onclick="submitActivity()">Submit Activity</button>
-    </form>
-  </div>
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-  <script>
-    let currentGPS = "";
+    let gps = null;
 
     function getLocation() {
+      document.getElementById("status").textContent = "📡 Getting GPS...";
+
       if (!navigator.geolocation) {
-        document.getElementById('gps-status').innerText = '❌ GPS not supported';
+        document.getElementById("status").textContent = "❌ GPS not supported";
         return;
       }
+
       navigator.geolocation.getCurrentPosition(
-        pos => {
-          currentGPS = pos.coords.latitude + ',' + pos.coords.longitude;
-          document.getElementById('gps-status').innerText = '📍 Location captured';
+        (pos) => {
+          gps = {
+            lat: pos.coords.latitude.toFixed(6),
+            lng: pos.coords.longitude.toFixed(6),
+            accuracy: pos.coords.accuracy
+          };
+          document.getElementById("status").innerHTML =
+            `📍 GPS Captured<br><small>Lat: ${gps.lat}, Lng: ${gps.lng}, ±${Math.round(gps.accuracy)}m</small>`;
         },
-        err => {
-          document.getElementById('gps-status').innerText = '❌ Unable to fetch GPS';
+        (err) => {
+          const msg = err.code === 1 ? "❌ Permission denied" :
+                      err.code === 2 ? "❌ Position unavailable" :
+                      err.code === 3 ? "❌ Timeout" : "❌ GPS error";
+          document.getElementById("status").innerHTML =
+            msg + '<br><button onclick="getLocation()">🔁 Retry</button>';
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 60000
         }
       );
     }
 
-    async function submitActivity() {
-      const form = document.getElementById('activityForm');
-      const empCode = localStorage.getItem("empCode");
-      const mobile = form.mobile.value.trim();
+    window.submitActivity = async function () {
+      const uid = localStorage.getItem("uid");
+      const form = document.getElementById("activityForm");
+      const data = Object.fromEntries(new FormData(form).entries());
+      if (!uid || !gps) return alert("❌ UID or GPS missing.");
 
-      if (!empCode) return alert("❗ Employee not logged in");
-      if (!currentGPS) return alert("❗ Location not captured yet");
-
-      if (mobile && !/^[6-9][0-9]{9}$/.test(mobile)) {
-        return alert("❗ Invalid mobile number (must start with 6-9 and be 10 digits).");
+      try {
+        await addDoc(collection(db, "activities", uid, "activityLogs"), {
+          ...data,
+          mobile: data.mobile,
+          orderAmount: Number(data.orderAmount || 0),
+          location: gps,
+          timestamp: serverTimestamp()
+        });
+        alert("✅ Activity Submitted!");
+        form.reset();
+        getLocation();
+      } catch (e) {
+        alert("❌ Submission failed: " + e.message);
       }
-
-      const formData = new FormData(form);
-      formData.append("type", "activity");
-      formData.append("empCode", empCode);
-      formData.append("location", currentGPS);
-
-      const res = await fetch("https://script.google.com/macros/s/AKfycbzemJVUlSXwcTnh09SlsrIfpq_-2r-a5O-9eydzTthp0xVGjW9uezw1R2uyN2zzDO5p3Q/exec", {
-        method: "POST",
-        body: formData
-      });
-
-      alert(await res.text());
-      form.reset();
-    }
-
-    window.onload = getLocation;
+    };
   </script>
 </body>
 </html>
