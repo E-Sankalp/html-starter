@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Sankalp Tracker - Menu</title>
+  <title>📋 Menu - Sankalp Tracker</title>
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
@@ -11,48 +11,42 @@
       padding: 30px;
       max-width: 400px;
       margin: auto;
-      text-align: center;
     }
     h2 {
       color: #2f7b47;
+      text-align: center;
       margin-bottom: 30px;
     }
     button {
       width: 100%;
       padding: 15px;
       margin: 10px 0;
-      background-color: #2f7b47;
+      font-size: 18px;
+      font-weight: bold;
       color: white;
+      background-color: #2f7b47;
       border: none;
       border-radius: 5px;
-      font-size: 16px;
-      font-weight: bold;
       cursor: pointer;
     }
     button:hover {
       background-color: #25663a;
     }
-    #empInfo {
-      margin-top: 20px;
-      font-size: 14px;
-      color: #444;
-    }
   </style>
 </head>
 <body>
-  <h2>📋 Sankalp Tracker Menu</h2>
+  <h2>📋 Select Action</h2>
 
-  <button onclick="navigate('punch.html')">🕒 Punch In / Out</button>
-  <button onclick="navigate('activity.html')">📍 Log Activity</button>
-  <button onclick="navigate('sale.html')">💼 Sales Entry</button>
-  <button onclick="navigate('report.html')">📊 My Report</button>
-  <button onclick="logout()">🚪 Logout</button>
+  <button id="punchBtn">📍 Punch In/Out</button>
+  <button id="activityBtn">📝 Log Activity</button>
+  <button id="saleBtn">💼 Sale Entry</button>
+  <button id="reportBtn">📊 View Reports</button>
+  <button id="logoutBtn">🚪 Logout</button>
 
-  <div id="empInfo"></div>
-
+  <!-- Firebase script module -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
-    import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDIJWrLMbNAmNWqaaNfBYCV09K6T4m82yQ",
@@ -66,22 +60,28 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
 
-    function navigate(page) {
-      window.location.href = page;
-    }
+    window.onload = () => {
+      const punchBtn = document.getElementById("punchBtn");
+      const activityBtn = document.getElementById("activityBtn");
+      const saleBtn = document.getElementById("saleBtn");
+      const reportBtn = document.getElementById("reportBtn");
+      const logoutBtn = document.getElementById("logoutBtn");
 
-    function logout() {
-      signOut(auth).then(() => {
-        alert("Logged out");
-        window.location.href = "login.html";
-      });
-    }
+      punchBtn.onclick = () => window.location.href = "punch.html";
+      activityBtn.onclick = () => window.location.href = "activity.html";
+      saleBtn.onclick = () => window.location.href = "sale.html";
+      reportBtn.onclick = () => window.location.href = "report.html";
+      logoutBtn.onclick = () => {
+        signOut(auth).then(() => {
+          window.location.href = "index.html";
+        });
+      };
+    };
 
+    // Auth check
     onAuthStateChanged(auth, (user) => {
-      if (user) {
-        document.getElementById("empInfo").innerText = `👤 Logged in as: ${user.email}`;
-      } else {
-        window.location.href = "login.html";
+      if (!user) {
+        window.location.href = "index.html";
       }
     });
   </script>
