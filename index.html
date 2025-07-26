@@ -15,21 +15,14 @@
         body {
             font-family: 'Inter', sans-serif;
         }
-
-        /* Style for custom radio buttons */
-        /* Hides the default radio button */
         .custom-radio input[type="radio"] {
             display: none;
         }
-
-        /* Style for the label that acts as the button */
         .custom-radio label {
             transition: all 0.2s ease-in-out;
         }
-
-        /* Style for the label when its corresponding radio is checked */
         .custom-radio input[type="radio"]:checked + label {
-            background-color: #2563eb; /* A nice blue color */
+            background-color: #2563eb;
             color: white;
             border-color: #2563eb;
             transform: scale(1.05);
@@ -39,12 +32,11 @@
 <body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
 
     <div class="w-full max-w-2xl mx-auto">
-        <!-- The main survey form container -->
         <div id="form-container" class="bg-white p-6 sm:p-8 rounded-xl shadow-lg transition-all duration-500">
             <h2 class="text-2xl sm:text-3xl font-bold text-center text-gray-800 mb-6">किसान सर्वेक्षण फॉर्म</h2>
             <form id="surveyForm">
                 <div class="space-y-6">
-                    <!-- Question 1 -->
+                    <!-- Questions remain the same -->
                     <div class="question">
                         <label class="block text-base sm:text-lg font-semibold text-gray-700 mb-3">1. आप किस प्रकार की खेती करते हैं?</label>
                         <div class="custom-radio grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -54,8 +46,6 @@
                             <div><input type="radio" id="a4" name="q1" value="फल"><label for="a4" class="block w-full text-center cursor-pointer rounded-lg border border-gray-200 bg-white px-4 py-3 text-gray-700 hover:bg-gray-50">फल</label></div>
                         </div>
                     </div>
-
-                    <!-- Question 2 -->
                     <div class="question">
                         <label class="block text-base sm:text-lg font-semibold text-gray-700 mb-3">2. आप कौन सी खाद का उपयोग करते हैं?</label>
                         <div class="custom-radio grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -65,8 +55,6 @@
                             <div><input type="radio" id="b4" name="q2" value="जैविक"><label for="b4" class="block w-full text-center cursor-pointer rounded-lg border border-gray-200 bg-white px-4 py-3 text-gray-700 hover:bg-gray-50">जैविक</label></div>
                         </div>
                     </div>
-
-                    <!-- Question 3 -->
                     <div class="question">
                         <label class="block text-base sm:text-lg font-semibold text-gray-700 mb-3">3. सिंचाई के लिए आप क्या उपयोग करते हैं?</label>
                         <div class="custom-radio grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -76,8 +64,6 @@
                             <div><input type="radio" id="c4" name="q3" value="वर्षा जल"><label for="c4" class="block w-full text-center cursor-pointer rounded-lg border border-gray-200 bg-white px-4 py-3 text-gray-700 hover:bg-gray-50">वर्षा जल</label></div>
                         </div>
                     </div>
-
-                    <!-- Question 4 -->
                     <div class="question">
                         <label class="block text-base sm:text-lg font-semibold text-gray-700 mb-3">4. क्या आप मिट्टी परीक्षण करवाते हैं?</label>
                         <div class="custom-radio grid grid-cols-2 gap-3">
@@ -85,8 +71,6 @@
                             <div><input type="radio" id="d2" name="q4" value="नहीं"><label for="d2" class="block w-full text-center cursor-pointer rounded-lg border border-gray-200 bg-white px-4 py-3 text-gray-700 hover:bg-gray-50">नहीं</label></div>
                         </div>
                     </div>
-
-                    <!-- Question 5: Rating -->
                     <div class="question">
                         <label class="block text-base sm:text-lg font-semibold text-gray-700 mb-3">5. आप हमारे उत्पाद/सेवा को कितनी रेटिंग देंगे?</label>
                         <div class="custom-radio grid grid-cols-5 gap-2">
@@ -98,8 +82,6 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Submit Button -->
                 <div class="mt-8">
                     <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-300">
                         सबमिट करें
@@ -107,8 +89,6 @@
                 </div>
             </form>
         </div>
-
-        <!-- Success Message Container (Initially Hidden) -->
         <div id="success-message" class="hidden bg-white p-8 rounded-xl shadow-lg text-center transition-all duration-500">
             <svg class="w-16 h-16 mx-auto text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
             <h3 class="text-2xl font-bold text-gray-800 mt-4">धन्यवाद!</h3>
@@ -117,53 +97,49 @@
     </div>
 
     <script>
-        // --- SCRIPT FOR GOOGLE APPS SCRIPT WEB APP ---
-
         const form = document.getElementById("surveyForm");
         const formContainer = document.getElementById("form-container");
         const successMessage = document.getElementById("success-message");
 
-        form.addEventListener("submit", function(e) {
-            e.preventDefault(); // Prevent the default form submission
+        // IMPORTANT: Replace this with your actual Google Apps Script Web App URL
+        const GOOGLE_SCRIPT_URL = 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL';
 
-            // Disable the button to prevent multiple submissions
+        form.addEventListener("submit", function(e) {
+            e.preventDefault();
+
             const submitButton = form.querySelector('button[type="submit"]');
             submitButton.disabled = true;
             submitButton.textContent = 'सबमिट हो रहा है...';
 
-            // Create a data object from the form
             const formData = new FormData(form);
-            const data = {};
-            // Using Object.fromEntries for a more concise way to build the object
-            for (const [key, value] of formData.entries()) {
-                data[key] = value;
-            }
 
-            // This function will be called on successful submission
-            function handleSuccess() {
-                // Hide the form and show the success message with a nice transition
-                formContainer.classList.add('opacity-0', 'transform', '-translate-y-4');
-                setTimeout(() => {
-                    formContainer.style.display = 'none';
-                    successMessage.classList.remove('hidden');
-                    successMessage.classList.add('opacity-100', 'transform', 'translate-y-0');
-                }, 500); // Wait for the fade-out animation to complete
-            }
-
-            // This function will be called if there's an error
-            function handleError(error) {
-                alert('एक त्रुटि हुई: ' + error.message); // Show error message
+            // Use fetch to send data to the Google Apps Script Web App
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.result === 'success') {
+                    // Hide the form and show the success message
+                    formContainer.classList.add('opacity-0', 'transform', '-translate-y-4');
+                    setTimeout(() => {
+                        formContainer.style.display = 'none';
+                        successMessage.classList.remove('hidden');
+                        successMessage.classList.add('opacity-100', 'transform', 'translate-y-0');
+                    }, 500);
+                } else {
+                    // If there was a server-side error
+                    throw new Error(data.message || 'Unknown error from server');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('एक त्रुटि हुई: ' + error.message);
                 // Re-enable the button
                 submitButton.disabled = false;
                 submitButton.textContent = 'सबमिट करें';
-            }
-            
-            // Call the Google Apps Script function on the server-side
-            // The .withSuccessHandler and .withFailureHandler provide better feedback
-            google.script.run
-                .withSuccessHandler(handleSuccess)
-                .withFailureHandler(handleError)
-                .saveSurveyResponse(data);
+            });
         });
     </script>
 </body>
