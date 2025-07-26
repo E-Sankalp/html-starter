@@ -1,81 +1,170 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Login - Sankalp Tracker</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #f0f4f7;
-      max-width: 400px;
-      margin: auto;
-      padding: 40px 20px;
-    }
-    h2 {
-      text-align: center;
-      color: #2f7b47;
-    }
-    input, button {
-      width: 100%;
-      padding: 12px;
-      margin: 12px 0;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-    }
-    button {
-      background-color: #2f7b47;
-      color: white;
-      border: none;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #25663a;
-    }
-  </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>किसान सर्वेक्षण फॉर्म</title>
+    <!-- Tailwind CSS for modern, responsive styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for a clean, readable font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Custom styles to enhance Tailwind */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Style for custom radio buttons */
+        /* Hides the default radio button */
+        .custom-radio input[type="radio"] {
+            display: none;
+        }
+
+        /* Style for the label that acts as the button */
+        .custom-radio label {
+            transition: all 0.2s ease-in-out;
+        }
+
+        /* Style for the label when its corresponding radio is checked */
+        .custom-radio input[type="radio"]:checked + label {
+            background-color: #2563eb; /* A nice blue color */
+            color: white;
+            border-color: #2563eb;
+            transform: scale(1.05);
+        }
+    </style>
 </head>
-<body>
-  <h2>🔐 Login</h2>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
 
-  <input type="email" id="email" placeholder="Email" required />
-  <input type="password" id="password" placeholder="Password" required />
-  <button onclick="login()">➡️ Login</button>
+    <div class="w-full max-w-2xl mx-auto">
+        <!-- The main survey form container -->
+        <div id="form-container" class="bg-white p-6 sm:p-8 rounded-xl shadow-lg transition-all duration-500">
+            <h2 class="text-2xl sm:text-3xl font-bold text-center text-gray-800 mb-6">किसान सर्वेक्षण फॉर्म</h2>
+            <form id="surveyForm">
+                <div class="space-y-6">
+                    <!-- Question 1 -->
+                    <div class="question">
+                        <label class="block text-base sm:text-lg font-semibold text-gray-700 mb-3">1. आप किस प्रकार की खेती करते हैं?</label>
+                        <div class="custom-radio grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            <div><input type="radio" id="a1" name="q1" value="धान" required><label for="a1" class="block w-full text-center cursor-pointer rounded-lg border border-gray-200 bg-white px-4 py-3 text-gray-700 hover:bg-gray-50">धान</label></div>
+                            <div><input type="radio" id="a2" name="q1" value="गेंहू"><label for="a2" class="block w-full text-center cursor-pointer rounded-lg border border-gray-200 bg-white px-4 py-3 text-gray-700 hover:bg-gray-50">गेंहू</label></div>
+                            <div><input type="radio" id="a3" name="q1" value="सब्जी"><label for="a3" class="block w-full text-center cursor-pointer rounded-lg border border-gray-200 bg-white px-4 py-3 text-gray-700 hover:bg-gray-50">सब्जी</label></div>
+                            <div><input type="radio" id="a4" name="q1" value="फल"><label for="a4" class="block w-full text-center cursor-pointer rounded-lg border border-gray-200 bg-white px-4 py-3 text-gray-700 hover:bg-gray-50">फल</label></div>
+                        </div>
+                    </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
+                    <!-- Question 2 -->
+                    <div class="question">
+                        <label class="block text-base sm:text-lg font-semibold text-gray-700 mb-3">2. आप कौन सी खाद का उपयोग करते हैं?</label>
+                        <div class="custom-radio grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            <div><input type="radio" id="b1" name="q2" value="यूरिया" required><label for="b1" class="block w-full text-center cursor-pointer rounded-lg border border-gray-200 bg-white px-4 py-3 text-gray-700 hover:bg-gray-50">यूरिया</label></div>
+                            <div><input type="radio" id="b2" name="q2" value="डीएपी"><label for="b2" class="block w-full text-center cursor-pointer rounded-lg border border-gray-200 bg-white px-4 py-3 text-gray-700 hover:bg-gray-50">डीएपी</label></div>
+                            <div><input type="radio" id="b3" name="q2" value="पोटाश"><label for="b3" class="block w-full text-center cursor-pointer rounded-lg border border-gray-200 bg-white px-4 py-3 text-gray-700 hover:bg-gray-50">पोटाश</label></div>
+                            <div><input type="radio" id="b4" name="q2" value="जैविक"><label for="b4" class="block w-full text-center cursor-pointer rounded-lg border border-gray-200 bg-white px-4 py-3 text-gray-700 hover:bg-gray-50">जैविक</label></div>
+                        </div>
+                    </div>
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDIJWrLMbNAmNWqaaNfBYCV09K6T4m82yQ",
-      authDomain: "sankalp-tracker.firebaseapp.com",
-      projectId: "sankalp-tracker",
-      storageBucket: "sankalp-tracker.appspot.com",
-      messagingSenderId: "795190822544",
-      appId: "1:795190822544:web:cf5b9dd4f083ba2c76fa15"
-    };
+                    <!-- Question 3 -->
+                    <div class="question">
+                        <label class="block text-base sm:text-lg font-semibold text-gray-700 mb-3">3. सिंचाई के लिए आप क्या उपयोग करते हैं?</label>
+                        <div class="custom-radio grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            <div><input type="radio" id="c1" name="q3" value="नलकूप" required><label for="c1" class="block w-full text-center cursor-pointer rounded-lg border border-gray-200 bg-white px-4 py-3 text-gray-700 hover:bg-gray-50">नलकूप</label></div>
+                            <div><input type="radio" id="c2" name="q3" value="कुआँ"><label for="c2" class="block w-full text-center cursor-pointer rounded-lg border border-gray-200 bg-white px-4 py-3 text-gray-700 hover:bg-gray-50">कुआँ</label></div>
+                            <div><input type="radio" id="c3" name="q3" value="नहर"><label for="c3" class="block w-full text-center cursor-pointer rounded-lg border border-gray-200 bg-white px-4 py-3 text-gray-700 hover:bg-gray-50">नहर</label></div>
+                            <div><input type="radio" id="c4" name="q3" value="वर्षा जल"><label for="c4" class="block w-full text-center cursor-pointer rounded-lg border border-gray-200 bg-white px-4 py-3 text-gray-700 hover:bg-gray-50">वर्षा जल</label></div>
+                        </div>
+                    </div>
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
+                    <!-- Question 4 -->
+                    <div class="question">
+                        <label class="block text-base sm:text-lg font-semibold text-gray-700 mb-3">4. क्या आप मिट्टी परीक्षण करवाते हैं?</label>
+                        <div class="custom-radio grid grid-cols-2 gap-3">
+                            <div><input type="radio" id="d1" name="q4" value="हाँ" required><label for="d1" class="block w-full text-center cursor-pointer rounded-lg border border-gray-200 bg-white px-4 py-3 text-gray-700 hover:bg-gray-50">हाँ</label></div>
+                            <div><input type="radio" id="d2" name="q4" value="नहीं"><label for="d2" class="block w-full text-center cursor-pointer rounded-lg border border-gray-200 bg-white px-4 py-3 text-gray-700 hover:bg-gray-50">नहीं</label></div>
+                        </div>
+                    </div>
 
-    window.login = function () {
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value.trim();
+                    <!-- Question 5: Rating -->
+                    <div class="question">
+                        <label class="block text-base sm:text-lg font-semibold text-gray-700 mb-3">5. आप हमारे उत्पाद/सेवा को कितनी रेटिंग देंगे?</label>
+                        <div class="custom-radio grid grid-cols-5 gap-2">
+                            <div><input type="radio" id="r1" name="rating" value="1" required><label for="r1" class="block w-full text-center cursor-pointer rounded-lg border border-gray-200 bg-white p-3 text-gray-700 hover:bg-gray-50">1</label></div>
+                            <div><input type="radio" id="r2" name="rating" value="2"><label for="r2" class="block w-full text-center cursor-pointer rounded-lg border border-gray-200 bg-white p-3 text-gray-700 hover:bg-gray-50">2</label></div>
+                            <div><input type="radio" id="r3" name="rating" value="3"><label for="r3" class="block w-full text-center cursor-pointer rounded-lg border border-gray-200 bg-white p-3 text-gray-700 hover:bg-gray-50">3</label></div>
+                            <div><input type="radio" id="r4" name="rating" value="4"><label for="r4" class="block w-full text-center cursor-pointer rounded-lg border border-gray-200 bg-white p-3 text-gray-700 hover:bg-gray-50">4</label></div>
+                            <div><input type="radio" id="r5" name="rating" value="5"><label for="r5" class="block w-full text-center cursor-pointer rounded-lg border border-gray-200 bg-white p-3 text-gray-700 hover:bg-gray-50">5</label></div>
+                        </div>
+                    </div>
+                </div>
 
-      if (!email || !password) {
-        alert("Please enter both email and password.");
-        return;
-      }
+                <!-- Submit Button -->
+                <div class="mt-8">
+                    <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-300">
+                        सबमिट करें
+                    </button>
+                </div>
+            </form>
+        </div>
 
-      signInWithEmailAndPassword(auth, email, password)
-        .then(() => {
-          window.location.href = "menu.html";
-        })
-        .catch((error) => {
-          alert("❌ Login failed: " + error.message);
+        <!-- Success Message Container (Initially Hidden) -->
+        <div id="success-message" class="hidden bg-white p-8 rounded-xl shadow-lg text-center transition-all duration-500">
+            <svg class="w-16 h-16 mx-auto text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <h3 class="text-2xl font-bold text-gray-800 mt-4">धन्यवाद!</h3>
+            <p class="text-gray-600 mt-2">आपका सर्वेक्षण सफलतापूर्वक सबमिट हो गया है।</p>
+        </div>
+    </div>
+
+    <script>
+        // --- SCRIPT FOR GOOGLE APPS SCRIPT WEB APP ---
+
+        const form = document.getElementById("surveyForm");
+        const formContainer = document.getElementById("form-container");
+        const successMessage = document.getElementById("success-message");
+
+        form.addEventListener("submit", function(e) {
+            e.preventDefault(); // Prevent the default form submission
+
+            // Disable the button to prevent multiple submissions
+            const submitButton = form.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
+            submitButton.textContent = 'सबमिट हो रहा है...';
+
+            // Create a data object from the form
+            const formData = new FormData(form);
+            const data = {};
+            // Using Object.fromEntries for a more concise way to build the object
+            for (const [key, value] of formData.entries()) {
+                data[key] = value;
+            }
+
+            // This function will be called on successful submission
+            function handleSuccess() {
+                // Hide the form and show the success message with a nice transition
+                formContainer.classList.add('opacity-0', 'transform', '-translate-y-4');
+                setTimeout(() => {
+                    formContainer.style.display = 'none';
+                    successMessage.classList.remove('hidden');
+                    successMessage.classList.add('opacity-100', 'transform', 'translate-y-0');
+                }, 500); // Wait for the fade-out animation to complete
+            }
+
+            // This function will be called if there's an error
+            function handleError(error) {
+                alert('एक त्रुटि हुई: ' + error.message); // Show error message
+                // Re-enable the button
+                submitButton.disabled = false;
+                submitButton.textContent = 'सबमिट करें';
+            }
+            
+            // Call the Google Apps Script function on the server-side
+            // The .withSuccessHandler and .withFailureHandler provide better feedback
+            google.script.run
+                .withSuccessHandler(handleSuccess)
+                .withFailureHandler(handleError)
+                .saveSurveyResponse(data);
         });
-    }
-  </script>
+    </script>
 </body>
 </html>
