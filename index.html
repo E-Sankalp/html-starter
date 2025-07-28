@@ -711,12 +711,13 @@
           punchOutBtnDisabled = false;
           activityFormVisible = true;
           punchInLocationInput.value = res.punchInLoc || "Location not recorded";
-          const match = res.punchInLoc.match(/q=([\d.-]+),([\d.-]+)/);
-          if (match) {
-            punchInData = { lat: parseFloat(match[1]), lon: parseFloat(match[2]), time: res.punchInTime };
+          // Fix: Correctly parse "lat,lng" string from Apps Script response
+          const locParts = (res.punchInLoc || "").split(',');
+          if (locParts.length === 2 && !isNaN(parseFloat(locParts[0])) && !isNaN(parseFloat(locParts[1]))) {
+            punchInData = { lat: parseFloat(locParts[0]), lon: parseFloat(locParts[1]), time: res.punchInTime };
           } else {
             punchInData = { lat: null, lon: null, time: res.punchInTime };
-            console.warn("Could not parse punch-in coordinates from link:", res.punchInLoc);
+            console.warn("Could not parse punch-in coordinates from string:", res.punchInLoc);
           }
           getActivityLocation();
         } else {
