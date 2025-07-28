@@ -444,3 +444,406 @@
         }
       });
     };
+
+    // --- General Fetch to Apps Script ---
+    async function sendToAppsScript(action, payload) {
+      if (!APPS_SCRIPT_WEB_APP_URL || APPS_SCRIPT_WEB_APP_URL === 'https://script.google.com/macros/s/AKfycbw01AKQ2LW8iPGta5ffFE2wfylZtW61OLRWyfaVkttAMkvneJyz0IZWCHYzS4Oydha7/exec') {
+        throw new Error("Apps Script Web App URL is not configured. Please update APPS_SCRIPT_WEB_APP_URL in the HTML.");
+      }
+
+      const url = new URL(APPS_SCRIPT_WEB_APP_URL);
+      url.searchParams.append('action', action); // Add action to query params for doGet/doPost
+
+      const response = await fetch(url.toString(), {
+        method: 'POST', // Use POST for all actions for consistency with doPost
+        headers: {
+          'Content-Type': 'text/plain', // Apps Script doPost typically expects text/plain for e.postData.contents
+        },
+        body: JSON.stringify(payload), // Send payload as JSON string
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Server error: ${response.status} - ${errorText}`);
+      }
+
+      const responseText = await response.text();
+      try {
+        return JSON.parse(responseText);
+      } catch (e) {
+        console.warn("Apps Script response was not JSON:", responseText);
+        return { success: true, message: responseText }; // Fallback for non-JSON responses
+      }
+    }
+
+    // --- Login Handler ---
+    async function handleLogin() {
+      const code = employeeCodeInput.value.trim();
+      const pass = passwordInput.value.trim();
+
+      if (!code || !pass) {
+        return showToast("Enter employee code and password", "warning");
+      }
+
+      showLoader();
+      try {
+        const res = await sendToAppsScript('verifyLogin', { code, password: pass });
+
+        if (!res || !res.user) {
+          throw new Error(res.message || 'Invalid credentials');
+        }
+
+        user = res.user;
+        sessionStorage.setItem("user", JSON.stringify(user));
+        showToast(`Welcome, ${user.name}`, "success");
+        checkPunchStatus(user.code); // Pass user code directly
+      } catch (err) {
+        showToast("Login failed: " + err.message, "error");
+      } finally {
+        hideLoader();
+      }
+    }
+
+    // --- Punch In Handler ---
+    async function handlePunchIn() {
+      if (!user) {
+        showToast("Please log in first.", "error");
+        return;
+      }
+
+      showLoader();
+      try {
+        const pos = await getGeoLocation();
+        const now = new Date().toISOString();
+        const newPunchInData = { lat: pos.coords.latitude, lon: pos.coords.longitude, time: now };
+
+        const res = await sendToAppsScript('punchIn', {
+          code: user.code,
+          name: user.name,
+          timestamp: now,
+          latitude: newPunchInData.lat,
+          longitude: newPunchInData.lon,
+        });
+
+        if (!res || !res.success) {
+          throw new Error(res.message || 'Punch In failed');
+        }
+
+        punchInData = newPunchInData;
+        punchInBtnDisabled = true;
+        punchOutBtnDisabled = false;
+        activityFormVisible = true;
+        punchInLocationInput.value = `${newPunchInData.lat}, ${newPunchInData.lon}`;
+        getActivityLocation(); // Get location for activity form
+        showToast("📍 Punch In Successful", "success");
+      } catch (err) {
+        showToast("Punch In failed: " + err, "error");
+      } finally {
+        hideLoader();
+        updateUI(); // Update UI after state changes
+      }
+    }
+
+    // --- Punch Out Handler ---
+    async function handlePunchOut() {
+      if (!user || !punchInData) {
+        showToast("No active Punch In session found.", "warning");
+        return;
+      }
+
+      showLoader();
+      try {
+        const pos = await getGeoLocation();
+        const outTime = new Date().toISOString();
+        const outLat = pos.coords.latitude;
+        const outLon = pos.coords.longitude;
+
+        const res = await sendToAppsScript('punchOut', {
+          code: user.code,
+          name: user.name,
+          punchInTime: punchInData.time,
+          punchInLat: punchInData.lat,
+          punchInLon: punchInData.lon,
+          punchOutTime: outTime,
+          punchOutLat: outLat,
+          punchOutLon: outLon,
+        });
+
+        if (!res || !res.success) {
+          throw new Error(res.message || 'Punch Out failed');
+        }
+
+        showToast(`📤 Punch Out Done — Distance: ${res.distance} KM`, "success");
+        sessionStorage.removeItem("user");
+        user = null;
+        punchInData = null;
+        employeeCodeInput.value = '';
+        passwordInput.value = '';
+        punchInLocationInput.value = '';
+        punchOutLocationInput.value = '';
+        activityFormVisible = false;
+        punchInBtnDisabled = false;
+        punchOutBtnDisabled = true;
+        resetActivityForm(); // Reset all activity form fields
+      } catch (err) {
+        showToast("Punch Out failed: " + err, "error");
+      } finally {
+        hideLoader();
+        updateUI(); // Update UI after state changes
+      }
+    }
+
+    // --- Get Activity Location ---
+    async function getActivityLocation() {
+      activityLocationInput.value = "Fetching GPS...";
+      try {
+        const pos = await getGeoLocation();
+        activityLocationInput.value = `${pos.coords.latitude}, ${pos.coords.longitude}`;
+      } catch (errMsg) {
+        activityLocationInput.value = "GPS not available: " + errMsg;
+      }
+    }
+
+    // --- Submit Activity Handler ---
+    async function submitActivity() {
+      let currentActivityLocation = activityLocationInput.value.trim();
+      const currentActivityType = activityTypeSelect.value;
+
+      // Location is mandatory for ALL activity types EXCEPT "Daily Report"
+      if (currentActivityType !== "Daily Report") {
+        if (!currentActivityLocation || currentActivityLocation.includes("GPS not available") || currentActivityLocation.includes("Fetching GPS...")) {
+          showToast("Attempting to get location...", "info");
+          try {
+            const pos = await getGeoLocation();
+            currentActivityLocation = `${pos.coords.latitude}, ${pos.coords.longitude}`;
+            activityLocationInput.value = currentActivityLocation; // Update UI
+          } catch (errMsg) {
+            showToast("📍 Location is required for this activity type and could not be obtained: " + errMsg, "error");
+            activityLocationInput.value = "GPS not available: " + errMsg; // Update UI with error
+            return; // Block submission
+          }
+        }
+      }
+
+      // Mobile number validation (now mandatory)
+      const mobileNum = mobileInput.value.trim();
+      if (!mobileNum) {
+        return showToast("Mobile number is mandatory.", "error");
+      }
+      if (!/^\d{10}$/.test(mobileNum)) {
+        return showToast("Invalid mobile number. Please enter a 10-digit number.", "error");
+      }
+
+      // ONLY show loader AFTER all client-side validations pass
+      showLoader();
+
+      const data = {
+        code: user.code,
+        name: user.name,
+        timestamp: new Date().toISOString(),
+        activityType: currentActivityType,
+        custCategory: custCategorySelect.value.trim(),
+        custName: custNameInput.value.trim(),
+        mobile: mobileNum,
+        location: currentActivityLocation,
+        message: messageTextarea.value.trim(),
+      };
+
+      if (currentActivityType === "Daily Report") {
+        Object.assign(data, {
+          product: productInput.value.trim(),
+          cpc: cpcInput.value.trim(),
+          snd: sndInput.value.trim(),
+          seed: seedInput.value.trim(),
+          feq: feqInput.value.trim(),
+          vet: vetInput.value.trim(),
+          wentWell: wentWellTextarea.value.trim(),
+          notWell: notWellTextarea.value.trim(),
+          improve: improveTextarea.value.trim(),
+          support: supportTextarea.value.trim()
+        });
+      }
+
+      // Check if images are being processed
+      if (imagesInput.files.length > 0 && resizedImagesData.length === 0) {
+        hideLoader();
+        showToast("Please wait for images to finish processing. Try again in a moment.", "info");
+        return;
+      }
+
+      try {
+        const action = resizedImagesData.length > 0 ? 'submitActivityWithImages' : 'submitActivity';
+        const payload = resizedImagesData.length > 0 ? { ...data, images: resizedImagesData } : data;
+
+        const res = await sendToAppsScript(action, payload);
+
+        if (!res || !res.success) {
+          throw new Error(res.message || 'Activity submission failed');
+        }
+
+        showToast(`✅ Activity ${resizedImagesData.length > 0 ? '& Images ' : ''}Submitted`, "success");
+        resetActivityForm();
+        getActivityLocation(); // Re-fetch location for next activity
+        toggleFieldSections(); // Re-toggle visibility for default activity
+      } catch (err) {
+        showToast("Activity submission failed: " + err.message, "error");
+      } finally {
+        hideLoader();
+        updateUI(); // Update UI after state changes
+      }
+    }
+
+    // --- Check Punch Status ---
+    async function checkPunchStatus(employeeCodeToCheck) {
+      if (!employeeCodeToCheck) return;
+
+      try {
+        const res = await sendToAppsScript('checkPunchStatus', { code: employeeCodeToCheck });
+
+        if (!res || typeof res.isIn === 'undefined') {
+          throw new Error(res.message || 'Failed to get punch status');
+        }
+
+        if (res.isIn) {
+          punchInBtnDisabled = true;
+          punchOutBtnDisabled = false;
+          activityFormVisible = true;
+          punchInLocationInput.value = res.punchInLoc || "Location not recorded";
+          const match = res.punchInLoc.match(/q=([\d.-]+),([\d.-]+)/);
+          if (match) {
+            punchInData = { lat: parseFloat(match[1]), lon: parseFloat(match[2]), time: res.punchInTime };
+          } else {
+            punchInData = { lat: null, lon: null, time: res.punchInTime };
+            console.warn("Could not parse punch-in coordinates from link:", res.punchInLoc);
+          }
+          getActivityLocation();
+        } else {
+          punchInBtnDisabled = false;
+          punchOutBtnDisabled = true;
+          activityFormVisible = false;
+        }
+      } catch (err) {
+        console.error("Failed to check punch status: ", err.message);
+        showToast("Could not retrieve punch status.", "error");
+        punchInBtnDisabled = false;
+        punchOutBtnDisabled = true;
+        activityFormVisible = false;
+      } finally {
+        toggleFieldSections(); // Ensure correct fields are shown/hidden based on activity type
+        updateUI(); // Update UI after state changes
+      }
+    }
+
+    // --- Toggle Activity Fields Visibility ---
+    function toggleFieldSections() {
+      if (salesFeedbackSection) {
+        salesFeedbackSection.style.display = (activityTypeSelect.value === "Daily Report") ? 'block' : 'none';
+      }
+
+      if (activityTypeSelect.value !== "Daily Report") {
+        getActivityLocation();
+      } else {
+        activityLocationInput.value = ""; // Clear location if not required
+      }
+    }
+
+    // --- Client-side Image Resizing Logic ---
+    async function processImages(files) {
+      previewImagesDiv.innerHTML = "";
+      resizedImagesData = []; // Clear previous data
+
+      for (const file of files) {
+        if (!file.type.startsWith('image/')) continue;
+
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          const img = new Image();
+          img.src = e.target.result;
+          img.onload = () => {
+            const MAX_WIDTH = 1024;
+            const MAX_HEIGHT = 768;
+            let width = img.width;
+            let height = img.height;
+
+            if (width > height) {
+              if (width > MAX_WIDTH) {
+                height *= MAX_WIDTH / width;
+                width = MAX_WIDTH;
+              }
+            } else {
+              if (height > MAX_HEIGHT) {
+                width *= MAX_HEIGHT / height;
+                height = MAX_HEIGHT;
+              }
+            }
+
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+
+            const resizedBase64 = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
+            resizedImagesData.push({
+              name: file.name,
+              content: resizedBase64
+            });
+
+            // Display a smaller preview
+            const previewImg = document.createElement("img");
+            previewImg.src = canvas.toDataURL('image/jpeg', 0.5);
+            previewImg.className = "h-24 w-auto rounded-lg shadow-sm mr-2 mt-2";
+            previewImagesDiv.appendChild(previewImg);
+          };
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    // --- Reset Activity Form Fields ---
+    function resetActivityForm() {
+      activityTypeSelect.value = 'Daily Report';
+      custCategorySelect.value = '';
+      custNameInput.value = '';
+      mobileInput.value = '';
+      activityLocationInput.value = 'Fetching GPS...';
+      messageTextarea.value = '';
+      productInput.value = '';
+      cpcInput.value = '';
+      sndInput.value = '';
+      seedInput.value = '';
+      feqInput.value = '';
+      vetInput.value = '';
+      wentWellTextarea.value = '';
+      notWellTextarea.value = '';
+      improveTextarea.value = '';
+      supportTextarea.value = '';
+      resizedImagesData = [];
+      imagesInput.value = ''; // Clear file input
+      previewImagesDiv.innerHTML = ""; // Clear image previews
+      toggleFieldSections(); // Re-toggle visibility for default activity
+    }
+
+    // --- Initial Load Logic ---
+    window.onload = function () {
+      const storedUser = sessionStorage.getItem("user");
+      if (storedUser) {
+        user = JSON.parse(storedUser);
+        checkPunchStatus(user.code);
+      }
+      updateUI(); // Initial UI render
+    };
+
+    // Event Listeners
+    imagesInput.addEventListener("change", function () {
+      processImages(this.files);
+    });
+
+    // Initial call to set correct visibility based on default/saved activity type
+    document.addEventListener("DOMContentLoaded", () => {
+      toggleFieldSections();
+    });
+
+  </script>
+</body>
+</html>
