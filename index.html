@@ -447,8 +447,9 @@
 
     // --- General Fetch to Apps Script ---
     async function sendToAppsScript(action, payload) {
-      if (!APPS_SCRIPT_WEB_APP_URL || APPS_SCRIPT_WEB_APP_URL === 'https://script.google.com/macros/s/AKfycbw01AKQ2LW8iPGta5ffFE2wfylZtW61OLRWyfaVkttAMkvneJyz0IZWCHYzS4Oydha7/exec') {
-        throw new Error("Apps Script Web App URL is not configured. Please update APPS_SCRIPT_WEB_APP_URL in the HTML.");
+      // Check if the URL is set and not the initial placeholder
+      if (!APPS_SCRIPT_WEB_APP_URL || APPS_SCRIPT_WEB_APP_URL.includes('YOUR_APPS_SCRIPT_WEB_APP_URL') || APPS_SCRIPT_WEB_APP_URL.includes('AKfycbw01AKQ2LW8iPGta5ffFE2wfylZtW61OLRWyfaVkttAMkvneJyz0IZWCHYzS4Oydha7')) {
+        throw new Error("Apps Script Web App URL is not configured correctly. Please update APPS_SCRIPT_WEB_APP_URL in the HTML.");
       }
 
       const url = new URL(APPS_SCRIPT_WEB_APP_URL);
@@ -472,6 +473,7 @@
         return JSON.parse(responseText);
       } catch (e) {
         console.warn("Apps Script response was not JSON:", responseText);
+        // If Apps Script returns plain text (e.g., simple success message), treat as success
         return { success: true, message: responseText }; // Fallback for non-JSON responses
       }
     }
