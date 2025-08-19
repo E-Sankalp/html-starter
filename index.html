@@ -123,8 +123,9 @@
 </head>
 <body>
 
-<div class="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-  <div class="w-full max-w-md">
+<!-- Layout change: removed flex centering to align content to the top -->
+<div class="min-h-screen bg-gray-50 p-4">
+  <div class="w-full max-w-md mx-auto">
     <div class="text-center mb-6">
       <h4 class="text-2xl sm:text-3xl lg:text-4xl text-blue-900 font-bold mb-2">Sankalp Field Attendance</h4>
     </div>
@@ -715,6 +716,7 @@
         if (res.isIn) {
           punchInBtnDisabled = true;
           punchOutBtnDisabled = false;
+          // Logic change: Set activityFormVisible to true if the user is already punched in.
           activityFormVisible = true;
           punchInLocationInput.value = res.punchInLoc || "Location not recorded";
           // Fix: Correctly parse "lat,lng" string from Apps Script response
@@ -878,5 +880,6 @@
   </script>
 </body>
 </html>
+
 
 
