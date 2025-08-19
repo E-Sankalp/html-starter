@@ -437,7 +437,7 @@
               }
               reject(msg);
             },
-            { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
           );
         } else {
           reject("Geolocation is not supported by your browser.");
@@ -755,51 +755,73 @@
       previewImagesDiv.innerHTML = "";
       resizedImagesData = []; // Clear previous data
 
-      for (const file of files) {
-        if (!file.type.startsWith('image/')) continue;
-
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-          const img = new Image();
-          img.src = e.target.result;
-          img.onload = () => {
-            const MAX_WIDTH = 1024;
-            const MAX_HEIGHT = 768;
-            let width = img.width;
-            let height = img.height;
-
-            if (width > height) {
-              if (width > MAX_WIDTH) {
-                height *= MAX_WIDTH / width;
-                width = MAX_WIDTH;
+      // Show processing toast
+      showToast("Processing images...", "info");
+      
+      const resizePromises = Array.from(files).map(file => {
+          return new Promise((resolve, reject) => {
+              if (!file.type.startsWith('image/')) {
+                  reject("Not an image file");
+                  return;
               }
-            } else {
-              if (height > MAX_HEIGHT) {
-                width *= MAX_HEIGHT / height;
-                height = MAX_HEIGHT;
-              }
-            }
 
-            const canvas = document.createElement('canvas');
-            canvas.width = width;
-            canvas.height = height;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, width, height);
+              const reader = new FileReader();
+              reader.onload = (e) => {
+                  const img = new Image();
+                  img.src = e.target.result;
+                  img.onload = () => {
+                      const MAX_WIDTH = 1024;
+                      const MAX_HEIGHT = 768;
+                      let width = img.width;
+                      let height = img.height;
 
-            const resizedBase64 = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
-            resizedImagesData.push({
-              name: file.name,
-              content: resizedBase64
-            });
+                      if (width > height) {
+                          if (width > MAX_WIDTH) {
+                              height *= MAX_WIDTH / width;
+                              width = MAX_WIDTH;
+                          }
+                      } else {
+                          if (height > MAX_HEIGHT) {
+                              width *= MAX_HEIGHT / height;
+                              height = MAX_HEIGHT;
+                          }
+                      }
 
-            // Display a smaller preview
-            const previewImg = document.createElement("img");
-            previewImg.src = canvas.toDataURL('image/jpeg', 0.5);
-            previewImg.className = "h-24 w-auto rounded-lg shadow-sm mr-2 mt-2";
-            previewImagesDiv.appendChild(previewImg);
-          };
-        };
-        reader.readAsDataURL(file);
+                      const canvas = document.createElement('canvas');
+                      canvas.width = width;
+                      canvas.height = height;
+                      const ctx = canvas.getContext('2d');
+                      ctx.drawImage(img, 0, 0, width, height);
+
+                      // Get the base64 string with reduced quality
+                      const resizedBase64 = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
+                      
+                      // Display a smaller preview
+                      const previewImg = document.createElement("img");
+                      previewImg.src = canvas.toDataURL('image/jpeg', 0.5);
+                      previewImg.className = "h-24 w-auto rounded-lg shadow-sm mr-2 mt-2";
+                      previewImagesDiv.appendChild(previewImg);
+
+                      resolve({
+                          name: file.name,
+                          content: resizedBase64
+                      });
+                  };
+                  img.onerror = () => reject("Image loading error");
+              };
+              reader.onerror = () => reject("File reading error");
+              reader.readAsDataURL(file);
+          });
+      });
+
+      try {
+          resizedImagesData = await Promise.all(resizePromises);
+          showToast(`✅ ${resizedImagesData.length} images ready to upload.`, "success");
+      } catch(error) {
+          console.error("Image processing failed:", error);
+          showToast("Image processing failed. Please try again.", "error");
+          resizedImagesData = [];
+          previewImagesDiv.innerHTML = "";
       }
     }
 
@@ -850,3 +872,4 @@
   </script>
 </body>
 </html>
+
