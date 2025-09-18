@@ -1,7 +1,3 @@
-
-
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -206,13 +202,13 @@
       >
         Login
       </button>
-      <button
+      <!-- <button
         type="button"
         class="btn bg-gray-500 text-white w-full py-3 mt-3 text-lg font-semibold rounded-xl hover:bg-gray-600 transition-colors duration-300"
         onclick="forceReset()"
       >
         Reset Session
-      </button>
+      </button> -->
     </div>
 
     <div id="mainSection" class="hidden">
@@ -474,13 +470,6 @@
     <div class="modal-content-custom">
       <div class="spinner-border-custom" role="status"></div>
       <div class="text-dark-custom">Processing...</div>
-<!--       <button
-        type="button"
-        class="btn bg-red-500 text-white py-2 px-4 mt-2 text-sm font-semibold rounded-lg hover:bg-red-600 transition-colors duration-300"
-        onclick="forceHideLoader()"
-      >
-        Dismiss
-      </button> -->
     </div>
   </div>
 
@@ -594,7 +583,6 @@
     function showLoader() {
       console.log('showLoader called');
       loading = true;
-      // Set timeout to force hide loader after 15 seconds
       loadingTimeout = setTimeout(() => {
         console.warn('Loading modal timeout reached, forcing hide');
         forceHideLoader();
@@ -611,7 +599,6 @@
         loadingTimeout = null;
       }
       loadingModal.classList.add('hidden');
-      // Force DOM update
       setTimeout(() => {
         if (!loadingModal.classList.contains('hidden')) {
           console.warn('Loading modal still visible, forcing hide');
@@ -629,7 +616,6 @@
         loadingTimeout = null;
       }
       loadingModal.classList.add('hidden');
-      // Force DOM update
       setTimeout(() => {
         if (!loadingModal.classList.contains('hidden')) {
           console.warn('Loading modal still visible, forcing hide');
@@ -687,7 +673,7 @@
       });
     };
 
-    async function sendToAppsScript(action, payload) {
+    async function sendToAppsScript(action, payload, retries = 2) {
       if (!APPS_SCRIPT_WEB_APP_URL || APPS_SCRIPT_WEB_APP_URL.includes('YOUR_APPS_SCRIPT_WEB_APP_URL') || APPS_SCRIPT_WEB_APP_URL.includes('AKfycbw01AKQ2LW8iPGta5ffFE2wfylZtW61OLRWyfaVkttAMkvneJyz0IZWCHYzS4Oydha7')) {
         throw new Error("Apps Script Web App URL is not configured correctly. Please update APPS_SCRIPT_WEB_APP_URL in the HTML.");
       }
@@ -696,14 +682,12 @@
       url.searchParams.append('action', action);
 
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10-second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
 
       try {
         const response = await fetch(url.toString(), {
           method: 'POST',
-          headers: {
-            'Content-Type': 'text/plain',
-          },
+          headers: { 'Content-Type': 'text/plain' },
           body: JSON.stringify(payload),
           signal: controller.signal
         });
@@ -725,6 +709,11 @@
       } catch (error) {
         clearTimeout(timeoutId);
         console.error(`sendToAppsScript failed for action ${action}:`, error);
+        if (retries > 0 && error.name !== 'AbortError') {
+          console.log(`Retrying ${action}... (${retries} retries left)`);
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          return sendToAppsScript(action, payload, retries - 1);
+        }
         throw error.name === 'AbortError' ? new Error('Request timed out') : error;
       }
     }
@@ -805,57 +794,90 @@
     }
 
     async function handlePunchOut() {
-      if (!user || !punchInData) {
-        showToast("No active Punch In session found.", "warning");
+      if (!user || !punchInData || !punchInData.time || !punchInData.store) {
+        showToast("No valid Punch In session found. Please punch in first.", "warning");
+        console.warn('Punch Out blocked: Invalid state', { user: !!user, punchInData: punchInData });
+        return;
+      }
+
+      if (punchOutBtnDisabled) {
+        showToast("Punch Out is currently disabled. Please try again.", "warning");
         return;
       }
 
       showLoader();
-      try {
-        const pos = await getGeoLocation();
-        const outTime = new Date().toISOString();
-        const outLat = pos.coords.latitude;
-        const outLon = pos.coords.longitude;
+      let attempts = 3;
+      let success = false;
+      let lastError = null;
 
-        const res = await sendToAppsScript('punchOut', {
-          code: user.code,
-          name: user.name,
-          punchInTime: punchInData.time,
-          punchInLat: punchInData.lat,
-          punchInLon: punchInData.lon,
-          punchOutTime: outTime,
-          punchOutLat: outLat,
-          punchOutLon: outLon,
-          store: punchInData.store
-        });
+      while (attempts > 0 && !success) {
+        try {
+          const pos = await getGeoLocation();
+          const outTime = new Date().toISOString();
+          const outLat = pos.coords.latitude;
+          const outLon = pos.coords.longitude;
 
-        if (!res || !res.success) {
-          throw new Error(res.message || 'Punch Out failed');
+          const payload = {
+            code: user.code,
+            name: user.name,
+            punchInTime: punchInData.time,
+            punchInLat: punchInData.lat,
+            punchInLon: punchInData.lon,
+            punchOutTime: outTime,
+            punchOutLat: outLat,
+            punchOutLon: outLon,
+            store: punchInData.store
+          };
+
+          console.log('Punch Out attempt:', { attempt: 4 - attempts, payload });
+
+          const res = await sendToAppsScript('punchOut', payload);
+
+          if (!res || !res.success) {
+            throw new Error(res.message || 'Punch Out failed');
+          }
+
+          success = true;
+          punchOutLocationInput.value = `${outLat}, ${outLon}`;
+          showToast(`📤 Punch Out Successful — Distance: ${res.distance || 'N/A'} KM`, "success");
+
+          // Reset state
+          sessionStorage.removeItem("user");
+          user = null;
+          punchInData = null;
+          employeeCodeInput.value = '';
+          passwordInput.value = '';
+          punchInLocationInput.value = '';
+          punchOutLocationInput.value = '';
+          storeSelect.value = '';
+          $('#storeSelect').val('').trigger('change');
+          storeSelect.disabled = false;
+          storeSelect.removeAttribute('disabled');
+          $('#storeSelect').select2('enable', true);
+          console.log('Punch Out: Dropdown enabled, storeSelect.disabled=', storeSelect.disabled);
+          activityFormVisible = false;
+          punchInBtnDisabled = false;
+          punchOutBtnDisabled = true;
+          resetActivityForm();
+        } catch (err) {
+          attempts--;
+          lastError = err;
+          console.error(`Punch Out attempt ${4 - attempts} failed:`, err.message);
+          if (attempts > 0) {
+            showToast(`Punch Out attempt failed. Retrying... (${attempts} left)`, "warning");
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          }
         }
-
-        showToast(`📤 Punch Out Done — Distance: ${res.distance} KM`, "success");
-        sessionStorage.removeItem("user");
-        user = null;
-        punchInData = null;
-        employeeCodeInput.value = '';
-        passwordInput.value = '';
-        punchInLocationInput.value = '';
-        punchOutLocationInput.value = '';
-        storeSelect.value = '';
-        $('#storeSelect').val('').trigger('change');
-        storeSelect.disabled = false;
-        storeSelect.removeAttribute('disabled');
-        $('#storeSelect').select2('enable', true);
-        console.log('Punch Out: Dropdown enabled, storeSelect.disabled=', storeSelect.disabled);
-        activityFormVisible = false;
-        punchInBtnDisabled = false;
-        punchOutBtnDisabled = true;
-        resetActivityForm();
-      } catch (err) {
-        showToast("Punch Out failed: " + err, "error");
-      } finally {
-        hideLoader();
       }
+
+      if (!success) {
+        showToast(`Punch Out failed after retries: ${lastError.message}. Please try again or reset session.`, "error");
+        // Fallback: Allow user to reset session
+        punchOutBtnDisabled = false;
+      }
+
+      hideLoader();
+      updateUI();
     }
 
     function forceReset() {
@@ -1032,7 +1054,6 @@
           $('#storeSelect').select2('enable', true);
           punchInData = null;
           console.log(`No punch-in or invalid punch-in data: storeSelect.disabled=${storeSelect.disabled}, Select2 enabled=${!$('#storeSelect').hasClass('select2-selection--disabled')}, response=${JSON.stringify(res, null, 2)}`);
-          // Force DOM update
           setTimeout(() => {
             if (storeSelect.disabled) {
               console.warn('storeSelect still disabled after setting to false, forcing enable');
@@ -1056,7 +1077,6 @@
         $('#storeSelect').select2('enable', true);
         punchInData = null;
         console.log(`Error case: storeSelect.disabled=${storeSelect.disabled}, Select2 enabled=${!$('#storeSelect').hasClass('select2-selection--disabled')}`);
-        // Force DOM update
         setTimeout(() => {
           if (storeSelect.disabled) {
             console.warn('storeSelect still disabled in error case, forcing enable');
@@ -1178,12 +1198,10 @@
     }
 
     window.onload = function () {
-      // Force enable dropdown and clear session storage if invalid
       storeSelect.disabled = false;
       storeSelect.removeAttribute('disabled');
       storeSelect.value = '';
       
-      // Check session storage first
       const storedUser = sessionStorage.getItem("user");
       if (storedUser) {
         try {
@@ -1209,7 +1227,6 @@
         console.log('No user in session storage, dropdown should be enabled');
       }
 
-      // Initialize Select2
       try {
         if (typeof $.fn.select2 === 'undefined') {
           console.error('Select2 is not loaded.');
@@ -1237,7 +1254,6 @@
         showToast('Failed to initialize store dropdown. Please refresh the page.', 'error');
       }
 
-      // Force re-enable dropdown if still disabled
       if (storeSelect.disabled) {
         console.warn('Dropdown unexpectedly disabled, forcing enable');
         storeSelect.disabled = false;
@@ -1246,7 +1262,6 @@
         showToast('🙏', 'warning');
       }
 
-      // Proceed with punch status check if user exists
       if (user && user.code) {
         checkPunchStatus(user.code);
       } else {
