@@ -12,7 +12,7 @@
   <style>
     body {
       font-family: 'Poppins', sans-serif;
-      background: #f3f6fc;
+      background: #e6f4fa; /* Light blue-green background */
       font-size: 1rem;
     }
     .container {
@@ -20,7 +20,7 @@
       padding: 1rem;
     }
     h4, h5 {
-      color: #000c8f;
+      color: #065f46; /* Dark teal for headings */
       font-weight: 700;
     }
     .form-input, .form-select, .form-textarea {
@@ -28,14 +28,14 @@
       padding: 1rem;
       min-height: 3rem;
       border-radius: 0.75rem;
-      border: 1px solid #d1d5db;
+      border: 1px solid #6ee7b7; /* Light teal border */
       width: 100%;
       background-color: #ffffff;
       transition: border-color 0.3s ease, box-shadow 0.3s ease;
     }
     .form-input:focus, .form-select:focus, .form-textarea:focus {
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+      border-color: #10b981; /* Bright teal for focus */
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
       outline: none;
     }
     .btn {
@@ -60,7 +60,7 @@
       font-size: 0.9rem;
       display: block;
       margin-bottom: 0.25rem;
-      color: #374151;
+      color: #064e3b; /* Darker teal for labels */
     }
     .hidden {
       display: none;
@@ -102,14 +102,14 @@
       border-right-color: transparent;
       border-radius: 50%;
       animation: spinner-border .75s linear infinite;
-      color: #000c8f;
+      color: #065f46; /* Dark teal for spinner */
       margin-bottom: 1rem;
     }
     @keyframes spinner-border {
       to { transform: rotate(360deg); }
     }
     .text-dark-custom {
-      color: #000c8f;
+      color: #065f46; /* Dark teal for modal text */
       font-size: 1.5rem;
       font-weight: bold;
     }
@@ -127,12 +127,12 @@
       font-weight: 600;
       font-size: 0.9rem;
     }
-    .bg-success-toast { background-color: #10b981; }
-    .bg-danger-toast { background-color: #ef4444; }
-    .bg-info-toast { background-color: #3b82f6; }
-    .bg-warning-toast { background-color: #f59e0b; }
+    .bg-success-toast { background-color: #10b981; } /* Teal for success */
+    .bg-danger-toast { background-color: #dc2626; } /* Keep red for errors */
+    .bg-info-toast { background-color: #06b6d4; } /* Cyan for info */
+    .bg-warning-toast { background-color: #d97706; } /* Amber for warnings */
     .select2-container--default .select2-selection--single {
-      border: 1px solid #d1d5db;
+      border: 1px solid #6ee7b7; /* Light teal border */
       border-radius: 0.75rem;
       min-height: 3rem;
       background-color: #ffffff;
@@ -141,27 +141,27 @@
     }
     .select2-container--default .select2-selection--single .select2-selection__rendered {
       line-height: 2rem;
-      color: #374151;
+      color: #064e3b; /* Darker teal for text */
     }
     .select2-container--default .select2-selection--single .select2-selection__arrow {
       height: 3rem;
     }
     .select2-container--default .select2-selection--single:focus {
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+      border-color: #10b981; /* Teal for focus */
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
       outline: none;
     }
     .select2-container--default .select2-dropdown {
-      border: 1px solid #d1d5db;
+      border: 1px solid #6ee7b7; /* Light teal border */
       border-radius: 0.75rem;
       background-color: #ffffff;
     }
     .select2-container--default .select2-results__option--highlighted[aria-selected] {
-      background-color: #3b82f6;
+      background-color: #10b981; /* Teal for highlighted options */
       color: #ffffff;
     }
     .select2-container--default .select2-search--dropdown .select2-search__field {
-      border: 1px solid #d1d5db;
+      border: 1px solid #6ee7b7; /* Light teal border */
       border-radius: 0.5rem;
       padding: 0.5rem;
       font-size: 1rem;
@@ -172,8 +172,8 @@
       cursor: not-allowed;
     }
     .punch-out-banner {
-      background-color: #fef3c7;
-      color: #78350f;
+      background-color: #a7f3d0; /* Light teal background */
+      color: #064e3b; /* Darker teal text */
       padding: 1rem;
       border-radius: 0.75rem;
       margin-bottom: 1rem;
@@ -186,7 +186,7 @@
 <div class="min-h-screen bg-gray-50 p-4">
   <div class="w-full max-w-md mx-auto">
     <div class="text-center mb-6">
-      <h4 class="text-2xl sm:text-3xl lg:text-4xl text-blue-900 font-bold mb-2">Sankalp Field Attendance.</h4>
+      <h4 class="text-2xl sm:text-3xl lg:text-4xl text-blue-900 font-bold mb-2">Sankalp Field Attendance</h4>
     </div>
 
     <div id="punchOutBanner" class="punch-out-banner hidden">
@@ -209,7 +209,7 @@
       />
       <button
         type="button"
-        class="btn bg-blue-700 text-white w-full py-3 text-lg font-semibold rounded-xl hover:bg-blue-800 transition-colors duration-300"
+        class="btn bg-teal-600 text-white w-full py-3 text-lg font-semibold rounded-xl hover:bg-teal-700 transition-colors duration-300"
         onclick="handleLogin()"
       >
         Login
@@ -217,13 +217,13 @@
     </div>
 
     <div id="mainSection" class="hidden">
-      <div class="bg-green-100 text-green-800 p-3 rounded-lg mb-4 text-md font-semibold" id="welcomeText"></div>
+      <div class="bg-teal-100 text-teal-800 p-3 rounded-lg mb-4 text-md font-semibold" id="welcomeText"></div>
 
       <div class="mb-5">
         <label for="storeSelect" class="block text-gray-700 text-sm font-medium mb-1">Select Store</label>
         <select
           id="storeSelect"
-          class="form-select w-full p-3 mb-3 text-lg border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500"
+          class="form-select w-full p-3 mb-3 text-lg border border-gray-300 rounded-xl focus:ring-teal-500 focus:border-teal-500"
         >
           <option value="">Select Store</option>
           <option value="SANKALP RETAIL STORE-KARNAL">SANKALP RETAIL STORE-KARNAL</option>
@@ -343,7 +343,7 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <button
           type="button"
-          class="btn bg-green-600 text-white py-3 text-lg font-semibold rounded-xl hover:bg-green-700 transition-colors duration-300 flex items-center justify-center"
+          class="btn bg-teal-600 text-white py-3 text-lg font-semibold rounded-xl hover:bg-teal-700 transition-colors duration-300 flex items-center justify-center"
           id="punchInBtn"
           onclick="handlePunchIn()"
         >
@@ -380,7 +380,7 @@
         <label for="activityType" class="block text-gray-700 text-sm font-medium mb-1">Activity Type</label>
         <select
           id="activityType"
-          class="form-select w-full p-3 mb-3 text-lg border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500"
+          class="form-select w-full p-3 mb-3 text-lg border border-gray-300 rounded-xl focus:ring-teal-500 focus:border-teal-500"
           onchange="toggleFieldSections()"
         >
           <option value="Daily Report">Daily Report</option>
@@ -393,7 +393,7 @@
         </select>
 
         <label for="custCategory" class="block text-gray-700 text-sm font-medium mb-1">Customer Category</label>
-        <select id="custCategory" class="form-select w-full p-3 mb-3 text-lg border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500">
+        <select id="custCategory" class="form-select w-full p-3 mb-3 text-lg border border-gray-300 rounded-xl focus:ring-teal-500 focus:border-teal-500">
           <option value="">Select</option>
           <option value="Sankalp Partner">Sankalp Partner</option>
           <option value="Sankalp Mitra">Sankalp Mitra</option>
@@ -401,12 +401,12 @@
         </select>
 
         <label for="custName" class="block text-gray-700 text-sm font-medium mb-1">Customer Name</label>
-        <input type="text" class="form-input w-full p-3 mb-3 text-lg border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500" id="custName" />
+        <input type="text" class="form-input w-full p-3 mb-3 text-lg border border-gray-300 rounded-xl focus:ring-teal-500 focus:border-teal-500" id="custName" />
 
         <label for="mobile" class="block text-gray-700 text-sm font-medium mb-1">Mobile Number</label>
         <input
           type="tel"
-          class="form-input w-full p-3 mb-3 text-lg border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500"
+          class="form-input w-full p-3 mb-3 text-lg border border-gray-300 rounded-xl focus:ring-teal-500 focus:border-teal-500"
           id="mobile"
           placeholder="e.g., 9876543210 (10-digits)"
           maxlength="10"
@@ -416,44 +416,44 @@
         <input type="text" class="form-input w-full p-3 mb-3 text-lg border border-gray-300 rounded-xl bg-gray-100" id="location" readonly placeholder="Fetching GPS..." />
 
         <label for="message" class="block text-gray-700 text-sm font-medium mb-1">Message</label>
-        <textarea class="form-textarea w-full p-3 mb-3 text-lg border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 resize-y min-h-[100px]" id="message"></textarea>
+        <textarea class="form-textarea w-full p-3 mb-3 text-lg border border-gray-300 rounded-xl focus:ring-teal-500 focus:border-teal-500 resize-y min-h-[100px]" id="message"></textarea>
 
         <div class="sales-feedback">
           <label for="product" class="block text-gray-700 text-sm font-medium mb-1">Product</label>
-          <input type="text" class="form-input w-full p-3 mb-3 text-lg border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500" id="product" />
+          <input type="text" class="form-input w-full p-3 mb-3 text-lg border border-gray-300 rounded-xl focus:ring-teal-500 focus:border-teal-500" id="product" />
 
           <label for="cpc" class="block text-gray-700 text-sm font-medium mb-1">CPC Sale</label>
-          <input type="number" class="form-input w-full p-3 mb-3 text-lg border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500" id="cpc" />
+          <input type="number" class="form-input w-full p-3 mb-3 text-lg border border-gray-300 rounded-xl focus:ring-teal-500 focus:border-teal-500" id="cpc" />
 
           <label for="snd" class="block text-gray-700 text-sm font-medium mb-1">SND Sale</label>
-          <input type="number" class="form-input w-full p-3 mb-3 text-lg border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500" id="snd" />
+          <input type="number" class="form-input w-full p-3 mb-3 text-lg border border-gray-300 rounded-xl focus:ring-teal-500 focus:border-teal-500" id="snd" />
 
           <label for="seed" class="block text-gray-700 text-sm font-medium mb-1">SEED Sale</label>
-          <input type="number" class="form-input w-full p-3 mb-3 text-lg border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500" id="seed" />
+          <input type="number" class="form-input w-full p-3 mb-3 text-lg border border-gray-300 rounded-xl focus:ring-teal-500 focus:border-teal-500" id="seed" />
 
           <label for="feq" class="block text-gray-700 text-sm font-medium mb-1">FEQ Sale</label>
-          <input type="number" class="form-input w-full p-3 mb-3 text-lg border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500" id="feq" />
+          <input type="number" class="form-input w-full p-3 mb-3 text-lg border border-gray-300 rounded-xl focus:ring-teal-500 focus:border-teal-500" id="feq" />
 
           <label for="vet" class="block text-gray-700 text-sm font-medium mb-1">VET Sale</label>
-          <input type="number" class="form-input w-full p-3 mb-3 text-lg border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500" id="vet" />
+          <input type="number" class="form-input w-full p-3 mb-3 text-lg border border-gray-300 rounded-xl focus:ring-teal-500 focus:border-teal-500" id="vet" />
 
           <label for="wentWell" class="block text-gray-700 text-sm font-medium mb-1">What Went Well</label>
-          <textarea class="form-textarea w-full p-3 mb-3 text-lg border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 resize-y min-h-[100px]" id="wentWell"></textarea>
+          <textarea class="form-textarea w-full p-3 mb-3 text-lg border border-gray-300 rounded-xl focus:ring-teal-500 focus:border-teal-500 resize-y min-h-[100px]" id="wentWell"></textarea>
 
           <label for="notWell" class="block text-gray-700 text-sm font-medium mb-1">What Did Not Go Well</label>
-          <textarea class="form-textarea w-full p-3 mb-3 text-lg border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 resize-y min-h-[100px]" id="notWell"></textarea>
+          <textarea class="form-textarea w-full p-3 mb-3 text-lg border border-gray-300 rounded-xl focus:ring-teal-500 focus:border-teal-500 resize-y min-h-[100px]" id="notWell"></textarea>
 
           <label for="improve" class="block text-gray-700 text-sm font-medium mb-1">How I Will Improve</label>
-          <textarea class="form-textarea w-full p-3 mb-3 text-lg border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 resize-y min-h-[100px]" id="improve"></textarea>
+          <textarea class="form-textarea w-full p-3 mb-3 text-lg border border-gray-300 rounded-xl focus:ring-teal-500 focus:border-teal-500 resize-y min-h-[100px]" id="improve"></textarea>
 
           <label for="support" class="block text-gray-700 text-sm font-medium mb-1">Support Required</label>
-          <textarea class="form-textarea w-full p-3 mb-3 text-lg border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 resize-y min-h-[100px]" id="support"></textarea>
+          <textarea class="form-textarea w-full p-3 mb-3 text-lg border border-gray-300 rounded-xl focus:ring-teal-500 focus:border-teal-500 resize-y min-h-[100px]" id="support"></textarea>
         </div>
 
         <label for="images" class="block text-gray-700 text-sm font-medium mb-1">Upload Images</label>
         <input
           type="file"
-          class="form-input w-full p-3 mb-3 text-lg border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+          class="form-input w-full p-3 mb-3 text-lg border border-gray-300 rounded-xl focus:ring-teal-500 focus:border-teal-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100"
           id="images"
           multiple
           accept="image/*"
@@ -462,7 +462,7 @@
 
         <button
           type="button"
-          class="btn bg-blue-700 text-white w-full py-3 text-lg font-semibold rounded-xl hover:bg-blue-800 transition-colors duration-300 mt-5"
+          class="btn bg-teal-600 text-white w-full py-3 text-lg font-semibold rounded-xl hover:bg-teal-700 transition-colors duration-300 mt-5"
           onclick="submitActivity()"
         >
           Submit Activity
@@ -598,13 +598,15 @@
 
     function showLoader() {
       console.log('showLoader called');
-      loading = true;
-      loadingTimeout = setTimeout(() => {
-        console.warn('Loading modal timeout reached, forcing hide');
-        forceHideLoader();
-        showToast('Operation took too long. Please try again.', 'warning');
-      }, 15000);
-      updateUI();
+      if (!loading) {
+        loading = true;
+        loadingTimeout = setTimeout(() => {
+          console.warn('Loading modal timeout reached, forcing hide');
+          forceHideLoader();
+          showToast('Operation took too long. Please try again.', 'warning');
+        }, 30000); // Increased to 30 seconds
+        updateUI();
+      }
     }
 
     function forceHideLoader() {
@@ -626,19 +628,21 @@
 
     function hideLoader() {
       console.log('hideLoader called');
-      loading = false;
-      if (loadingTimeout) {
-        clearTimeout(loadingTimeout);
-        loadingTimeout = null;
-      }
-      loadingModal.classList.add('hidden');
-      setTimeout(() => {
-        if (!loadingModal.classList.contains('hidden')) {
-          console.warn('Loading modal still visible, forcing hide');
-          loadingModal.style.display = 'none';
+      if (loading) {
+        loading = false;
+        if (loadingTimeout) {
+          clearTimeout(loadingTimeout);
+          loadingTimeout = null;
         }
-      }, 100);
-      updateUI();
+        loadingModal.classList.add('hidden');
+        setTimeout(() => {
+          if (!loadingModal.classList.contains('hidden')) {
+            console.warn('Loading modal still visible, forcing hide');
+            loadingModal.style.display = 'none';
+          }
+        }, 100);
+        updateUI();
+      }
     }
 
     function showToast(msg, type = 'info') {
@@ -698,7 +702,7 @@
       url.searchParams.append('action', action);
 
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // Increased timeout to 15 seconds for fetch
 
       try {
         const response = await fetch(url.toString(), {
@@ -777,7 +781,7 @@
       try {
         const pos = await getGeoLocation();
         const now = new Date().toISOString();
-        const newPunchInData = { lat: pos.coords.latitude, lon: pos.coords.longitude, time: now, store };
+        const newPunchInData = { lat: pos.coords.latitude, lon: pos.coords.longitude, time: now, store, code: user.code };
 
         const res = await sendToAppsScript('punchIn', {
           code: user.code,
