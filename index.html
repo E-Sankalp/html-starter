@@ -131,7 +131,6 @@
     .bg-danger-toast { background-color: #ef4444; }
     .bg-info-toast { background-color: #3b82f6; }
     .bg-warning-toast { background-color: #f59e0b; }
-    /* Select2 Custom Styles */
     .select2-container--default .select2-selection--single {
       border: 1px solid #d1d5db;
       border-radius: 0.75rem;
@@ -172,13 +171,26 @@
       opacity: 0.6;
       cursor: not-allowed;
     }
+    .punch-out-banner {
+      background-color: #fef3c7;
+      color: #78350f;
+      padding: 1rem;
+      border-radius: 0.75rem;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
   </style>
 </head>
 <body>
 <div class="min-h-screen bg-gray-50 p-4">
   <div class="w-full max-w-md mx-auto">
     <div class="text-center mb-6">
-      <h4 class="text-2xl sm:text-3xl lg:text-4xl text-blue-900 font-bold mb-2">Sankalp Field Attendance</h4>
+      <h4 class="text-2xl sm:text-3xl lg:text-4xl text-blue-900 font-bold mb-2">Sankalp Field Attendance.</h4>
+    </div>
+
+    <div id="punchOutBanner" class="punch-out-banner hidden">
+      Last Punch Out: <span id="punchOutBannerDetails"></span>
     </div>
 
     <div id="loginSection" class="bg-white p-6 rounded-2xl shadow-lg mb-6">
@@ -202,13 +214,6 @@
       >
         Login
       </button>
-      <!-- <button
-        type="button"
-        class="btn bg-gray-500 text-white w-full py-3 mt-3 text-lg font-semibold rounded-xl hover:bg-gray-600 transition-colors duration-300"
-        onclick="forceReset()"
-      >
-        Reset Session
-      </button> -->
     </div>
 
     <div id="mainSection" class="hidden">
@@ -480,6 +485,7 @@
 
     let user = null;
     let punchInData = null; // { lat, lon, time, store }
+    let punchOutData = null; // { lat, lon, time }
     let loading = false;
     let loadingTimeout = null;
     let toast = { message: '', type: '' };
@@ -521,6 +527,8 @@
     const salesFeedbackSection = document.querySelector('.sales-feedback');
     const loadingModal = document.getElementById('loadingModal');
     const toastContainer = document.getElementById('toastContainer');
+    const punchOutBanner = document.getElementById('punchOutBanner');
+    const punchOutBannerDetails = document.getElementById('punchOutBannerDetails');
 
     const haversineDistance = (lat1, lon1, lat2, lon2) => {
       const R = 6371;
@@ -536,7 +544,7 @@
     };
 
     function updateUI() {
-      console.log(`updateUI called: user=${!!user}, punchInData=${!!punchInData}, storeSelect.disabled=${storeSelect.disabled}, Select2 enabled=${!$('#storeSelect').hasClass('select2-selection--disabled')}, loading=${loading}`);
+      console.log(`updateUI called: user=${!!user}, punchInData=${!!punchInData}, punchOutData=${!!punchOutData}, storeSelect.disabled=${storeSelect.disabled}, Select2 enabled=${!$('#storeSelect').hasClass('select2-selection--disabled')}, loading=${loading}`);
       if (loading) {
         loadingModal.classList.remove('hidden');
       } else {
@@ -561,6 +569,14 @@
         storeSelect.disabled = false;
         $('#storeSelect').select2('enable', true);
         console.log('No user, forcing dropdown enabled: storeSelect.disabled=', storeSelect.disabled);
+      }
+
+      // Show punch-out banner if punchOutData exists
+      if (punchOutData && !user) {
+        punchOutBanner.classList.remove('hidden');
+        punchOutBannerDetails.innerText = `Location: ${punchOutData.lat}, ${punchOutData.lon} at ${new Date(punchOutData.time).toLocaleString()}`;
+      } else {
+        punchOutBanner.classList.add('hidden');
       }
 
       // Sync Select2 state with native select
@@ -777,6 +793,8 @@
         }
 
         punchInData = newPunchInData;
+        localStorage.setItem('punchInData', JSON.stringify(punchInData));
+        localStorage.removeItem('punchOutData'); // Clear any previous punch-out data
         punchInBtnDisabled = true;
         punchOutBtnDisabled = false;
         activityFormVisible = true;
@@ -806,85 +824,70 @@
       }
 
       showLoader();
-      let attempts = 3;
-      let success = false;
-      let lastError = null;
+      try {
+        const pos = await getGeoLocation();
+        const outTime = new Date().toISOString();
+        const outLat = pos.coords.latitude;
+        const outLon = pos.coords.longitude;
+        const distance = haversineDistance(punchInData.lat, punchInData.lon, outLat, outLon);
 
-      while (attempts > 0 && !success) {
-        try {
-          const pos = await getGeoLocation();
-          const outTime = new Date().toISOString();
-          const outLat = pos.coords.latitude;
-          const outLon = pos.coords.longitude;
+        // Perform instant local punch-out
+        punchOutData = { lat: outLat, lon: outLon, time: outTime };
+        localStorage.setItem('punchOutData', JSON.stringify(punchOutData));
+        punchOutLocationInput.value = `${outLat}, ${outLon}`;
+        showToast(`📤 Punch Out Successful — Distance: ${distance} KM`, "success");
 
-          const payload = {
-            code: user.code,
-            name: user.name,
-            punchInTime: punchInData.time,
-            punchInLat: punchInData.lat,
-            punchInLon: punchInData.lon,
-            punchOutTime: outTime,
-            punchOutLat: outLat,
-            punchOutLon: outLon,
-            store: punchInData.store
-          };
+        // Send punch-out data to server in the background
+        const payload = {
+          code: user.code,
+          name: user.name,
+          punchInTime: punchInData.time,
+          punchInLat: punchInData.lat,
+          punchInLon: punchInData.lon,
+          punchOutTime: outTime,
+          punchOutLat: outLat,
+          punchOutLon: outLon,
+          store: punchInData.store
+        };
 
-          console.log('Punch Out attempt:', { attempt: 4 - attempts, payload });
+        sendToAppsScript('punchOut', payload).catch(err => {
+          console.error('Background punch-out sync failed:', err);
+          showToast('Punch Out recorded locally but server sync failed. It will retry on next login.', 'warning');
+        });
 
-          const res = await sendToAppsScript('punchOut', payload);
-
-          if (!res || !res.success) {
-            throw new Error(res.message || 'Punch Out failed');
-          }
-
-          success = true;
-          punchOutLocationInput.value = `${outLat}, ${outLon}`;
-          showToast(`📤 Punch Out Successful — Distance: ${res.distance || 'N/A'} KM`, "success");
-
-          // Reset state
-          sessionStorage.removeItem("user");
-          user = null;
-          punchInData = null;
-          employeeCodeInput.value = '';
-          passwordInput.value = '';
-          punchInLocationInput.value = '';
-          punchOutLocationInput.value = '';
-          storeSelect.value = '';
-          $('#storeSelect').val('').trigger('change');
-          storeSelect.disabled = false;
-          storeSelect.removeAttribute('disabled');
-          $('#storeSelect').select2('enable', true);
-          console.log('Punch Out: Dropdown enabled, storeSelect.disabled=', storeSelect.disabled);
-          activityFormVisible = false;
-          punchInBtnDisabled = false;
-          punchOutBtnDisabled = true;
-          resetActivityForm();
-        } catch (err) {
-          attempts--;
-          lastError = err;
-          console.error(`Punch Out attempt ${4 - attempts} failed:`, err.message);
-          if (attempts > 0) {
-            showToast(`Punch Out attempt failed. Retrying... (${attempts} left)`, "warning");
-            await new Promise(resolve => setTimeout(resolve, 1000));
-          }
-        }
+        // Reset state
+        sessionStorage.removeItem("user");
+        localStorage.removeItem('punchInData');
+        user = null;
+        punchInData = null;
+        employeeCodeInput.value = '';
+        passwordInput.value = '';
+        punchInLocationInput.value = '';
+        storeSelect.value = '';
+        $('#storeSelect').val('').trigger('change');
+        storeSelect.disabled = false;
+        storeSelect.removeAttribute('disabled');
+        $('#storeSelect').select2('enable', true);
+        console.log('Punch Out: Dropdown enabled, storeSelect.disabled=', storeSelect.disabled);
+        activityFormVisible = false;
+        punchInBtnDisabled = false;
+        punchOutBtnDisabled = true;
+        resetActivityForm();
+      } catch (err) {
+        showToast(`Punch Out failed: ${err.message}. Please try again.`, "error");
+      } finally {
+        hideLoader();
       }
-
-      if (!success) {
-        showToast(`Punch Out failed after retries: ${lastError.message}. Please try again or reset session.`, "error");
-        // Fallback: Allow user to reset session
-        punchOutBtnDisabled = false;
-      }
-
-      hideLoader();
       updateUI();
     }
 
     function forceReset() {
       console.log('forceReset called: Clearing session and resetting UI');
       sessionStorage.clear();
+      localStorage.clear();
       user = null;
       punchInData = null;
+      punchOutData = null;
       punchInBtnDisabled = false;
       punchOutBtnDisabled = true;
       activityFormVisible = false;
@@ -1014,6 +1017,34 @@
         return;
       }
 
+      // Check local storage for punch-in status
+      const storedPunchIn = localStorage.getItem('punchInData');
+      if (storedPunchIn) {
+        try {
+          punchInData = JSON.parse(storedPunchIn);
+          if (punchInData.code !== employeeCodeToCheck) {
+            localStorage.removeItem('punchInData');
+            punchInData = null;
+          }
+        } catch (err) {
+          console.error('Failed to parse stored punch-in data:', err);
+          localStorage.removeItem('punchInData');
+          punchInData = null;
+        }
+      }
+
+      // Check local storage for punch-out status
+      const storedPunchOut = localStorage.getItem('punchOutData');
+      if (storedPunchOut) {
+        try {
+          punchOutData = JSON.parse(storedPunchOut);
+        } catch (err) {
+          console.error('Failed to parse stored punch-out data:', err);
+          localStorage.removeItem('punchOutData');
+          punchOutData = null;
+        }
+      }
+
       showLoader();
       try {
         const clientTimestamp = new Date().toISOString();
@@ -1022,6 +1053,11 @@
 
         if (!res || typeof res.isIn === 'undefined') {
           throw new Error(res.message || 'Failed to get punch status');
+        }
+
+        if (res.isIn && res.punchInTime && res.store && !punchInData) {
+          punchInData = { lat: parseFloat(res.punchInLoc.split(',')[0]), lon: parseFloat(res.punchInLoc.split(',')[1]), time: res.punchInTime, store: res.store, code: employeeCodeToCheck };
+          localStorage.setItem('punchInData', JSON.stringify(punchInData));
         }
 
         if (res.isIn && res.punchInTime && res.store) {
@@ -1037,9 +1073,11 @@
           console.log(`Punch-in detected: storeSelect.disabled=${storeSelect.disabled}, Select2 enabled=${!$('#storeSelect').hasClass('select2-selection--disabled')}, store=${res.store}, punchInTime=${res.punchInTime}`);
           const locParts = (res.punchInLoc || "").split(',');
           if (locParts.length === 2 && !isNaN(parseFloat(locParts[0])) && !isNaN(parseFloat(locParts[1]))) {
-            punchInData = { lat: parseFloat(locParts[0]), lon: parseFloat(locParts[1]), time: res.punchInTime, store: res.store };
+            punchInData = { lat: parseFloat(locParts[0]), lon: parseFloat(locParts[1]), time: res.punchInTime, store: res.store, code: employeeCodeToCheck };
+            localStorage.setItem('punchInData', JSON.stringify(punchInData));
           } else {
-            punchInData = { lat: null, lon: null, time: res.punchInTime, store: res.store };
+            punchInData = { lat: null, lon: null, time: res.punchInTime, store: res.store, code: employeeCodeToCheck };
+            localStorage.setItem('punchInData', JSON.stringify(punchInData));
             console.warn("Could not parse punch-in coordinates from string:", res.punchInLoc);
           }
           getActivityLocation();
@@ -1052,7 +1090,9 @@
           storeSelect.disabled = false;
           storeSelect.removeAttribute('disabled');
           $('#storeSelect').select2('enable', true);
-          punchInData = null;
+          if (!punchInData) {
+            localStorage.removeItem('punchInData');
+          }
           console.log(`No punch-in or invalid punch-in data: storeSelect.disabled=${storeSelect.disabled}, Select2 enabled=${!$('#storeSelect').hasClass('select2-selection--disabled')}, response=${JSON.stringify(res, null, 2)}`);
           setTimeout(() => {
             if (storeSelect.disabled) {
@@ -1075,7 +1115,9 @@
         storeSelect.disabled = false;
         storeSelect.removeAttribute('disabled');
         $('#storeSelect').select2('enable', true);
-        punchInData = null;
+        if (!punchInData) {
+          localStorage.removeItem('punchInData');
+        }
         console.log(`Error case: storeSelect.disabled=${storeSelect.disabled}, Select2 enabled=${!$('#storeSelect').hasClass('select2-selection--disabled')}`);
         setTimeout(() => {
           if (storeSelect.disabled) {
@@ -1203,6 +1245,17 @@
       storeSelect.value = '';
       
       const storedUser = sessionStorage.getItem("user");
+      const storedPunchOut = localStorage.getItem('punchOutData');
+      if (storedPunchOut) {
+        try {
+          punchOutData = JSON.parse(storedPunchOut);
+        } catch (err) {
+          console.error('Failed to parse stored punch-out data:', err);
+          localStorage.removeItem('punchOutData');
+          punchOutData = null;
+        }
+      }
+
       if (storedUser) {
         try {
           user = JSON.parse(storedUser);
