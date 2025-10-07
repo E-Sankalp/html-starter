@@ -1008,6 +1008,12 @@
       }
     }
 
+    function isAfterAutoPunchOutTime() {
+      const now = new Date();
+      const autoTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 19, 0, 0);
+      return now > autoTime;
+    }
+
     async function checkPunchStatus(employeeCodeToCheck) {
       console.log(`checkPunchStatus called with code: ${employeeCodeToCheck}, clientTimestamp: ${new Date().toISOString()}`);
       storeSelect.disabled = false;
@@ -1107,6 +1113,12 @@
               console.log('Forced enable in checkPunchStatus: storeSelect.disabled=', storeSelect.disabled);
             }
           }, 100);
+        }
+
+        // Check for auto punch out after status retrieval
+        if (punchInData && isAfterAutoPunchOutTime()) {
+          showToast("Auto Punch Out triggered because it's after 7 PM IST", "info");
+          handlePunchOut();
         }
       } catch (err) {
         console.error("Failed to check punch status: ", err.message);
@@ -1324,6 +1336,14 @@
       } else {
         updateUI();
       }
+
+      // Set up interval for auto punch out check (every minute)
+      setInterval(() => {
+        if (punchInData && isAfterAutoPunchOutTime()) {
+          showToast("Auto Punch Out at 7 PM IST", "info");
+          handlePunchOut();
+        }
+      }, 60000);
     };
 
     imagesInput.addEventListener("change", function () {
