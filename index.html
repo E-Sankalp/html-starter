@@ -360,15 +360,6 @@
         </button>
       </div>
 
-      <button
-        type="button"
-        class="btn bg-yellow-600 text-white py-3 text-lg font-semibold rounded-xl hover:bg-yellow-700 transition-colors duration-300 flex items-center justify-center w-full hidden mb-6"
-        id="resetSessionBtn"
-        onclick="forceReset()"
-      >
-        <span class="mr-2"></span> Reset Session
-      </button>
-
       <div class="mb-3">
         <label for="punchInLocation" class="block text-gray-700 text-sm font-medium mb-1">Punch In Location</label>
         <input type="text" class="form-input w-full p-3 text-lg border border-gray-300 rounded-xl bg-gray-100" id="punchInLocation" readonly />
@@ -538,7 +529,6 @@
     const toastContainer = document.getElementById('toastContainer');
     const punchOutBanner = document.getElementById('punchOutBanner');
     const punchOutBannerDetails = document.getElementById('punchOutBannerDetails');
-    const resetSessionBtn = document.getElementById('resetSessionBtn');
 
     const haversineDistance = (lat1, lon1, lat2, lon2) => {
       const R = 6371;
@@ -576,6 +566,8 @@
       } else {
         loginSection.classList.remove('hidden');
         mainSection.classList.add('hidden');
+        storeSelect.disabled = false;
+        $('#storeSelect').select2('enable', true);
         console.log('No user, forcing dropdown enabled: storeSelect.disabled=', storeSelect.disabled);
       }
 
@@ -811,7 +803,9 @@
         punchOutBtnDisabled = false;
         activityFormVisible = true;
         punchInLocationInput.value = `${newPunchInData.lat}, ${newPunchInData.lon}`;
-        console.log('Punch In: Dropdown not disabled');
+        storeSelect.disabled = true;
+        $('#storeSelect').select2('enable', false);
+        console.log('Punch In: Dropdown disabled, storeSelect.disabled=', storeSelect.disabled);
         getActivityLocation();
         showToast(`📍 Punch In Successful at ${store}`, "success");
       } catch (err) {
@@ -875,6 +869,9 @@
         punchInLocationInput.value = '';
         storeSelect.value = '';
         $('#storeSelect').val('').trigger('change');
+        storeSelect.disabled = false;
+        storeSelect.removeAttribute('disabled');
+        $('#storeSelect').select2('enable', true);
         console.log('Punch Out: Dropdown enabled, storeSelect.disabled=', storeSelect.disabled);
         activityFormVisible = false;
         punchInBtnDisabled = false;
@@ -900,12 +897,14 @@
       activityFormVisible = false;
       storeSelect.value = '';
       $('#storeSelect').val('').trigger('change');
+      storeSelect.disabled = false;
+      storeSelect.removeAttribute('disabled');
+      $('#storeSelect').select2('enable', true);
       employeeCodeInput.value = '';
       passwordInput.value = '';
       punchInLocationInput.value = '';
       punchOutLocationInput.value = '';
       resetActivityForm();
-      resetSessionBtn.classList.add('hidden');
       showToast("Session reset. Dropdown enabled. Please log in again.", "info");
       console.log('forceReset completed: storeSelect.disabled=', storeSelect.disabled);
       updateUI();
@@ -1017,6 +1016,9 @@
 
     async function checkPunchStatus(employeeCodeToCheck) {
       console.log(`checkPunchStatus called with code: ${employeeCodeToCheck}, clientTimestamp: ${new Date().toISOString()}`);
+      storeSelect.disabled = false;
+      storeSelect.removeAttribute('disabled');
+      $('#storeSelect').select2('enable', true);
       console.log(`checkPunchStatus initial: storeSelect.disabled=${storeSelect.disabled}, Select2 enabled=${!$('#storeSelect').hasClass('select2-selection--disabled')}`);
 
       if (!employeeCodeToCheck) {
@@ -1075,6 +1077,9 @@
           punchInLocationInput.value = res.punchInLoc || "Location not recorded";
           storeSelect.value = res.store || '';
           $('#storeSelect').val(res.store || '').trigger('change');
+          storeSelect.disabled = true;
+          storeSelect.setAttribute('disabled', 'disabled');
+          $('#storeSelect').select2('enable', false);
           console.log(`Punch-in detected: storeSelect.disabled=${storeSelect.disabled}, Select2 enabled=${!$('#storeSelect').hasClass('select2-selection--disabled')}, store=${res.store}, punchInTime=${res.punchInTime}`);
           const locParts = (res.punchInLoc || "").split(',');
           if (locParts.length === 2 && !isNaN(parseFloat(locParts[0])) && !isNaN(parseFloat(locParts[1]))) {
@@ -1086,13 +1091,15 @@
             console.warn("Could not parse punch-in coordinates from string:", res.punchInLoc);
           }
           getActivityLocation();
-          resetSessionBtn.classList.remove('hidden');
         } else {
           punchInBtnDisabled = false;
           punchOutBtnDisabled = true;
           activityFormVisible = false;
           storeSelect.value = '';
           $('#storeSelect').val('').trigger('change');
+          storeSelect.disabled = false;
+          storeSelect.removeAttribute('disabled');
+          $('#storeSelect').select2('enable', true);
           if (!punchInData) {
             localStorage.removeItem('punchInData');
           }
@@ -1106,7 +1113,6 @@
               console.log('Forced enable in checkPunchStatus: storeSelect.disabled=', storeSelect.disabled);
             }
           }, 100);
-          resetSessionBtn.classList.add('hidden');
         }
 
         // Check for auto punch out after status retrieval
@@ -1122,6 +1128,9 @@
         activityFormVisible = false;
         storeSelect.value = '';
         $('#storeSelect').val('').trigger('change');
+        storeSelect.disabled = false;
+        storeSelect.removeAttribute('disabled');
+        $('#storeSelect').select2('enable', true);
         if (!punchInData) {
           localStorage.removeItem('punchInData');
         }
@@ -1135,7 +1144,6 @@
             console.log('Forced enable in error case: storeSelect.disabled=', storeSelect.disabled);
           }
         }, 100);
-        resetSessionBtn.classList.add('hidden');
       } finally {
         hideLoader();
       }
@@ -1272,12 +1280,16 @@
             console.warn('Invalid user data (missing code or name), clearing session storage');
             sessionStorage.clear();
             user = null;
+            storeSelect.disabled = false;
+            storeSelect.removeAttribute('disabled');
             showToast('Session data cleared due to invalid user. Please log in again.', 'warning');
           }
         } catch (err) {
           console.error('Failed to parse stored user:', err);
           sessionStorage.clear();
           user = null;
+          storeSelect.disabled = false;
+          storeSelect.removeAttribute('disabled');
           showToast('Session data cleared due to error. Please log in again.', 'error');
         }
       } else {
