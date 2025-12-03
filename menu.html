@@ -1,101 +1,183 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>📋 Menu - Sankalp Tracker</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #f0f4f7;
-      padding: 30px;
-      max-width: 400px;
-      margin: auto;
-    }
-    h2 {
-      color: #2f7b47;
-      text-align: center;
-      margin-bottom: 30px;
-    }
-    button {
-      width: 100%;
-      padding: 15px;
-      margin: 10px 0;
-      font-size: 18px;
-      font-weight: bold;
-      color: white;
-      background-color: #2f7b47;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #25663a;
-    }
-  </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sankalp Admin Panel</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #f3f4f6;
+        }
+
+        #map {
+            width: 100%;
+            height: 500px;
+            border-radius: 14px;
+        }
+
+        /* Blinking Blue Location Marker */
+        .blink-marker {
+            height: 18px;
+            width: 18px;
+            background-color: #3182ce;
+            border-radius: 50%;
+            animation: blink 1s infinite;
+            border: 3px solid white;
+            box-shadow: 0 0 8px rgba(0,0,255,0.8);
+        }
+
+        @keyframes blink {
+            0% { transform: scale(0.8); opacity: 0.7; }
+            50% { transform: scale(1.3); opacity: 1; }
+            100% { transform: scale(0.8); opacity: 0.7; }
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+            margin-bottom: 15px;
+        }
+    </style>
 </head>
-<body>
-  <h2>📋 Select Action</h2>
 
-  <button id="punchBtn">📍 Punch In/Out</button>
-  <button id="activityBtn">📝 Log Activity</button>
-  <button id="saleBtn">💼 Sale Entry</button>
-  <button id="reportBtn">📊 View Reports</button>
-  <button id="logoutBtn">🚪 Logout</button>
+<body class="p-4">
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
-    import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
+    <h2 class="text-3xl font-bold mb-5 text-purple-700">Admin Dashboard</h2>
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDIJWrLMbNAmNWqaaNfBYCV09K6T4m82yQ",
-      authDomain: "sankalp-tracker.firebaseapp.com",
-      projectId: "sankalp-tracker",
-      storageBucket: "sankalp-tracker.appspot.com",
-      messagingSenderId: "795190822544",
-      appId: "1:795190822544:web:cf5b9dd4f083ba2c76fa15"
-    };
+    <!-- MAP SECTION -->
+    <div class="card">
+        <h3 class="text-xl font-bold text-purple-600 mb-3">Live User Locations</h3>
+        <div id="map"></div>
+    </div>
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+    <!-- TABLE SECTION -->
+    <div class="card">
+        <h3 class="text-xl font-bold text-purple-600 mb-3">All Activities</h3>
+        <table class="w-full border">
+            <thead class="bg-purple-100">
+                <tr>
+                    <th class="p-2 border">Code</th>
+                    <th class="p-2 border">Name</th>
+                    <th class="p-2 border">Time</th>
+                    <th class="p-2 border">Activity</th>
+                    <th class="p-2 border">Location</th>
+                </tr>
+            </thead>
+            <tbody id="activityTable"></tbody>
+        </table>
+    </div>
 
-    window.onload = async () => {
-      const punchBtn = document.getElementById("punchBtn");
-      const activityBtn = document.getElementById("activityBtn");
-      const saleBtn = document.getElementById("saleBtn");
-      const reportBtn = document.getElementById("reportBtn");
-      const logoutBtn = document.getElementById("logoutBtn");
+    <!-- DOWNLOAD SECTION -->
+    <div class="card">
+        <h3 class="text-xl font-bold text-purple-600 mb-3">Download Logs</h3>
+        <button
+            onclick="downloadPunchLog()"
+            class="bg-purple-600 text-white px-4 py-2 rounded-lg mr-3"
+        >
+            Download Punch Log (Excel)
+        </button>
 
-      onAuthStateChanged(auth, async (user) => {
-        if (!user) {
-          window.location.href = "login.html";
-          return;
-        }
+        <button
+            onclick="downloadActivityLog()"
+            class="bg-purple-600 text-white px-4 py-2 rounded-lg"
+        >
+            Download Activity Log (Excel)
+        </button>
+    </div>
 
-        const userRef = doc(db, "users", user.uid);
-        const userSnap = await getDoc(userRef);
-        const userData = userSnap.exists() ? userSnap.data() : {};
+<script>
 
-        punchBtn.onclick = () => window.location.href = "punch.html";
-        activityBtn.onclick = () => window.location.href = "activity.html";
-        saleBtn.onclick = () => window.location.href = "sale.html";
+// SAME BACKEND URL
+const APPS_SCRIPT_WEB_APP_URL =
+  "https://script.google.com/macros/s/AKfycbzrx-pZbNBDr-aRXJpcPibzm_KQlRO47UfzJfirNLRy4pdebwJz3Eu3OVnEkCb4FU2F1g/exec";
 
-        if (userData.role === "admin") {
-          reportBtn.onclick = () => window.location.href = "report.html";
-          reportBtn.style.display = "block";
-        } else {
-          reportBtn.style.display = "none";
-        }
+/* ------------------------------
+   1. INITIALIZE MAP
+------------------------------- */
+let map;
+function initMap() {
+    map = new google.maps.Map(document.getElementById("map"), {
+        zoom: 6,
+        center: { lat: 22.97, lng: 78.65 },
+    });
 
-        logoutBtn.onclick = () => {
-          signOut(auth).then(() => {
-            window.location.href = "index.html";
-          });
-        };
-      });
-    };
-  </script>
+    loadUserLocations();
+    loadActivityLogs();
+}
+
+/* ------------------------------
+   2. LOAD USERS LAST LOCATION
+------------------------------- */
+function loadUserLocations() {
+    fetch(APPS_SCRIPT_WEB_APP_URL + "?action=getAllLastLocations")
+        .then(res => res.json())
+        .then(data => {
+            data.forEach(user => {
+                if (!user.lat || !user.lon) return;
+
+                const markerDiv = document.createElement("div");
+                markerDiv.className = "blink-marker";
+
+                new google.maps.Marker({
+                    position: { lat: user.lat, lng: user.lon },
+                    map,
+                    title: user.code + " - " + user.name,
+                    icon: {
+                        url: "data:image/svg+xml;charset=UTF-8," +
+                           encodeURIComponent(`<svg width="20" height="20" xmlns="http://www.w3.org/2000/svg">
+                           <circle cx="10" cy="10" r="8" fill="#3182ce"/></svg>`),
+                        scaledSize: new google.maps.Size(25, 25)
+                    }
+                });
+            });
+        });
+}
+
+/* ------------------------------
+   3. LOAD ACTIVITY TABLE
+------------------------------- */
+function loadActivityLogs() {
+    fetch(APPS_SCRIPT_WEB_APP_URL + "?action=getAdminActivity")
+        .then(res => res.json())
+        .then(rows => {
+            let html = "";
+            rows.forEach(r => {
+                html += `
+                <tr>
+                    <td class="border p-1">${r.code}</td>
+                    <td class="border p-1">${r.name}</td>
+                    <td class="border p-1">${r.time}</td>
+                    <td class="border p-1">${r.activity}</td>
+                    <td class="border p-1">${r.location}</td>
+                </tr>`;
+            });
+            document.getElementById("activityTable").innerHTML = html;
+        });
+}
+
+/* ------------------------------
+   4. DOWNLOAD SHEETS
+------------------------------- */
+function downloadPunchLog() {
+    window.open(APPS_SCRIPT_WEB_APP_URL + "?action=downloadPunchLog", "_blank");
+}
+
+function downloadActivityLog() {
+    window.open(APPS_SCRIPT_WEB_APP_URL + "?action=downloadActivityLog", "_blank");
+}
+
+</script>
+
+<!-- GOOGLE MAPS -->
+<script async
+    src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAP_KEY&callback=initMap">
+</script>
+
 </body>
 </html>
