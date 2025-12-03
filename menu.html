@@ -7,113 +7,114 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
 
+    <!-- LEAFLET (FREE MAP API) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
     <style>
         body {
             font-family: 'Poppins', sans-serif;
-            background: #f3f4f6;
+            background: #eef1f7;
         }
 
         #map {
             width: 100%;
-            height: 500px;
-            border-radius: 14px;
+            height: 520px;
+            border-radius: 16px;
         }
 
-        /* Blinking Blue Location Marker */
-        .blink-marker {
-            height: 18px;
-            width: 18px;
-            background-color: #3182ce;
+        /* Blinking marker (blue dot) */
+        .blink-icon {
+            width: 16px;
+            height: 16px;
+            background: #3182ce;
             border-radius: 50%;
-            animation: blink 1s infinite;
             border: 3px solid white;
-            box-shadow: 0 0 8px rgba(0,0,255,0.8);
+            box-shadow: 0 0 10px rgba(0,0,255,0.6);
+            animation: blink 1.2s infinite;
         }
-
         @keyframes blink {
-            0% { transform: scale(0.8); opacity: 0.7; }
-            50% { transform: scale(1.3); opacity: 1; }
-            100% { transform: scale(0.8); opacity: 0.7; }
+            0%   { transform: scale(0.8); opacity: 0.6; }
+            50%  { transform: scale(1.3); opacity: 1; }
+            100% { transform: scale(0.8); opacity: 0.6; }
         }
 
         .card {
             background: white;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.12);
-            margin-bottom: 15px;
+            border-radius: 16px;
+            padding: 22px;
+            box-shadow: 0 3px 14px rgba(0,0,0,0.15);
+            margin-bottom: 18px;
         }
     </style>
 </head>
 
-<body class="p-4">
+<body class="p-5">
 
-    <h2 class="text-3xl font-bold mb-5 text-purple-700">Admin Dashboard</h2>
+    <h2 class="text-3xl font-bold mb-6 text-purple-700">Admin Dashboard</h2>
 
-    <!-- MAP SECTION -->
-    <div class="card">
-        <h3 class="text-xl font-bold text-purple-600 mb-3">Live User Locations</h3>
-        <div id="map"></div>
-    </div>
+    <!-- DOWNLOAD BUTTONS AT TOP -->
+    <div class="card mb-6">
+        <h3 class="text-xl font-bold text-purple-700 mb-4">Download Logs</h3>
 
-    <!-- TABLE SECTION -->
-    <div class="card">
-        <h3 class="text-xl font-bold text-purple-600 mb-3">All Activities</h3>
-        <table class="w-full border">
-            <thead class="bg-purple-100">
-                <tr>
-                    <th class="p-2 border">Code</th>
-                    <th class="p-2 border">Name</th>
-                    <th class="p-2 border">Time</th>
-                    <th class="p-2 border">Activity</th>
-                    <th class="p-2 border">Location</th>
-                </tr>
-            </thead>
-            <tbody id="activityTable"></tbody>
-        </table>
-    </div>
-
-    <!-- DOWNLOAD SECTION -->
-    <div class="card">
-        <h3 class="text-xl font-bold text-purple-600 mb-3">Download Logs</h3>
         <button
             onclick="downloadPunchLog()"
-            class="bg-purple-600 text-white px-4 py-2 rounded-lg mr-3"
+            class="bg-purple-600 text-white px-5 py-3 rounded-lg shadow-md hover:bg-purple-700 transition mr-4"
         >
-            Download Punch Log (Excel)
+            📥 Download Punch Log (Excel)
         </button>
 
         <button
             onclick="downloadActivityLog()"
-            class="bg-purple-600 text-white px-4 py-2 rounded-lg"
+            class="bg-purple-600 text-white px-5 py-3 rounded-lg shadow-md hover:bg-purple-700 transition"
         >
-            Download Activity Log (Excel)
+            📥 Download Activity Log (Excel)
         </button>
+    </div>
+
+    <!-- MAP AREA -->
+    <div class="card">
+        <h3 class="text-xl font-bold text-purple-700 mb-4">Live User Locations</h3>
+        <div id="map"></div>
+    </div>
+
+    <!-- ACTIVITY TABLE -->
+    <div class="card">
+        <h3 class="text-xl font-bold text-purple-700 mb-4">User Activities</h3>
+
+        <div class="overflow-auto">
+            <table class="w-full border border-gray-300 rounded-lg">
+                <thead class="bg-purple-100">
+                    <tr>
+                        <th class="p-2 border">Code</th>
+                        <th class="p-2 border">Name</th>
+                        <th class="p-2 border">Time</th>
+                        <th class="p-2 border">Activity</th>
+                        <th class="p-2 border">Location</th>
+                    </tr>
+                </thead>
+                <tbody id="activityTable"></tbody>
+            </table>
+        </div>
     </div>
 
 <script>
 
 // SAME BACKEND URL
-const APPS_SCRIPT_WEB_APP_URL =
-  "https://script.google.com/macros/s/AKfycbzrx-pZbNBDr-aRXJpcPibzm_KQlRO47UfzJfirNLRy4pdebwJz3Eu3OVnEkCb4FU2F1g/exec";
+const APPS_SCRIPT_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzrx-pZbNBDr-aRXJpcPibzm_KQlRO47UfzJfirNLRy4pdebwJz3Eu3OVnEkCb4FU2F1g/exec";
 
-/* ------------------------------
-   1. INITIALIZE MAP
-------------------------------- */
-let map;
-function initMap() {
-    map = new google.maps.Map(document.getElementById("map"), {
-        zoom: 6,
-        center: { lat: 22.97, lng: 78.65 },
-    });
+/* -----------------------------------
+   INIT FREE MAP (Leaflet + OSM)
+----------------------------------- */
+let map = L.map("map").setView([22.97, 78.65], 6);
 
-    loadUserLocations();
-    loadActivityLogs();
-}
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19,
+}).addTo(map);
 
-/* ------------------------------
-   2. LOAD USERS LAST LOCATION
-------------------------------- */
+/* -----------------------------------
+   LOAD USER LAST LOCATIONS (FREE MAP)
+----------------------------------- */
 function loadUserLocations() {
     fetch(APPS_SCRIPT_WEB_APP_URL + "?action=getAllLastLocations")
         .then(res => res.json())
@@ -121,27 +122,25 @@ function loadUserLocations() {
             data.forEach(user => {
                 if (!user.lat || !user.lon) return;
 
-                const markerDiv = document.createElement("div");
-                markerDiv.className = "blink-marker";
-
-                new google.maps.Marker({
-                    position: { lat: user.lat, lng: user.lon },
-                    map,
-                    title: user.code + " - " + user.name,
-                    icon: {
-                        url: "data:image/svg+xml;charset=UTF-8," +
-                           encodeURIComponent(`<svg width="20" height="20" xmlns="http://www.w3.org/2000/svg">
-                           <circle cx="10" cy="10" r="8" fill="#3182ce"/></svg>`),
-                        scaledSize: new google.maps.Size(25, 25)
-                    }
+                // blinking custom HTML icon
+                const iconHtml = L.divIcon({
+                    html: '<div class="blink-icon"></div>',
+                    className: '',
+                    iconSize: [20, 20],
+                    iconAnchor: [10, 10],
                 });
+
+                L.marker([user.lat, user.lon], {
+                    icon: iconHtml
+                }).addTo(map)
+                  .bindPopup(`<b>${user.code}</b><br>${user.name}`);
             });
         });
 }
 
-/* ------------------------------
-   3. LOAD ACTIVITY TABLE
-------------------------------- */
+/* -----------------------------------
+   LOAD ACTIVITY TABLE
+----------------------------------- */
 function loadActivityLogs() {
     fetch(APPS_SCRIPT_WEB_APP_URL + "?action=getAdminActivity")
         .then(res => res.json())
@@ -161,9 +160,9 @@ function loadActivityLogs() {
         });
 }
 
-/* ------------------------------
-   4. DOWNLOAD SHEETS
-------------------------------- */
+/* -----------------------------------
+   DOWNLOAD FUNCTIONS
+----------------------------------- */
 function downloadPunchLog() {
     window.open(APPS_SCRIPT_WEB_APP_URL + "?action=downloadPunchLog", "_blank");
 }
@@ -172,12 +171,14 @@ function downloadActivityLog() {
     window.open(APPS_SCRIPT_WEB_APP_URL + "?action=downloadActivityLog", "_blank");
 }
 
-</script>
+/* -----------------------------------
+   CALL LOAD FUNCTIONS
+----------------------------------- */
+loadUserLocations();
+loadActivityLogs();
 
-<!-- GOOGLE MAPS -->
-<script async
-    src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAP_KEY&callback=initMap">
 </script>
 
 </body>
 </html>
+
