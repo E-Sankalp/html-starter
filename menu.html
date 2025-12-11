@@ -126,7 +126,14 @@
     </div>
 
 <script>
+const correctPassword = "Sankalp@12125";  // your password
 
+    let input = prompt("Enter Password to Access:");
+
+    if (input !== correctPassword) {
+        document.body.innerHTML = "<h2 style='color:red;text-align:center;margin-top:40px;'>Access Denied ❌</h2>";
+        throw new Error("Unauthorized");
+    }
 // SAME BACKEND URL
 const APPS_SCRIPT_WEB_APP_URL = "https://script.google.com/macros/s/AKfycby3aio6LAlBGWDUHIXE0kq-7nxCHCEa_FYuoHkYgKLTLjCx8vc5nwDgmdwn6rSwF2kG5Q/exec";
 
