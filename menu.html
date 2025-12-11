@@ -25,19 +25,30 @@
 
         /* Blinking marker (blue dot) */
         .blink-icon {
-            width: 16px;
-            height: 16px;
-            background: #3182ce;
-            border-radius: 50%;
-            border: 3px solid white;
-            box-shadow: 0 0 10px rgba(0,0,255,0.6);
-            animation: blink 1.2s infinite;
-        }
-        @keyframes blink {
-            0%   { transform: scale(0.8); opacity: 0.6; }
-            50%  { transform: scale(1.3); opacity: 1; }
-            100% { transform: scale(0.8); opacity: 0.6; }
-        }
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    animation: blink 1s infinite;
+}
+
+.red-icon {
+    background-color: red;
+}
+
+.green-icon {
+    background-color: green;
+}
+
+.grey-icon {
+    background-color: grey;
+}
+
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0.2; }
+    100% { opacity: 1; }
+}
+
 
         .card {
             background: white;
@@ -101,7 +112,7 @@
 <script>
 
 // SAME BACKEND URL
-const APPS_SCRIPT_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxjgtiQv3GHTy5gdlkWAVfSdQNE7-EM2XYK0IFQQK0CbXxdrsycknWBlXERy7Y9O5Kf-A/exec";
+const APPS_SCRIPT_WEB_APP_URL = "https://script.google.com/macros/s/AKfycby3aio6LAlBGWDUHIXE0kq-7nxCHCEa_FYuoHkYgKLTLjCx8vc5nwDgmdwn6rSwF2kG5Q/exec";
 
 /* -----------------------------------
    INIT FREE MAP (Leaflet + OSM)
@@ -120,11 +131,34 @@ function loadUserLocations() {
         .then(res => res.json())
         .then(data => {
             data.forEach(user => {
-                if (!user.lat || !user.lon) return;
 
-                // blinking custom HTML icon
+                /* -------------------------------------------------
+                   DO NOT REMOVE → users with no punch still appear
+                   but without marker
+                --------------------------------------------------- */
+                if (!user.lat || !user.lon) {
+                    // user has not punched in → NO MARKER
+                    return;
+                }
+
+                /* -------------------------------------------------
+                   NEW COLOR LOGIC (required by you)
+                --------------------------------------------------- */
+                let colorClass = "";
+
+                if (user.punchedIn === false) {
+                    colorClass = "grey-icon";           // NOT punched in today
+                } else if (user.punchedIn === true && user.hasActivity === false) {
+                    colorClass = "red-icon";            // PUNCHED IN only (no visit)
+                } else if (user.hasActivity === true) {
+                    colorClass = "green-icon";          // ACTIVITY done
+                }
+
+                /* -------------------------------------------------
+                   Blinking custom HTML icon with color class
+                --------------------------------------------------- */
                 const iconHtml = L.divIcon({
-                    html: '<div class="blink-icon"></div>',
+                    html: `<div class="blink-icon ${colorClass}"></div>`,
                     className: '',
                     iconSize: [20, 20],
                     iconAnchor: [10, 10],
@@ -137,6 +171,7 @@ function loadUserLocations() {
             });
         });
 }
+
 
 /* -----------------------------------
    LOAD ACTIVITY TABLE
