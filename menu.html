@@ -23,7 +23,7 @@
             border-radius: 16px;
         }
 
-        /* Blinking marker (blue dot) */
+        /* Blinking BLUE icon */
         .blink-icon {
             width: 16px;
             height: 16px;
@@ -53,32 +53,96 @@
 
     <h2 class="text-3xl font-bold mb-6 text-purple-700">Admin Dashboard</h2>
 
-    <!-- DOWNLOAD BUTTONS AT TOP -->
+    <!-- DOWNLOAD BUTTONS -->
     <div class="card mb-6">
         <h3 class="text-xl font-bold text-purple-700 mb-4">Download Logs</h3>
 
-        <button
-            onclick="downloadPunchLog()"
-            class="bg-purple-600 text-white px-5 py-3 rounded-lg shadow-md hover:bg-purple-700 transition mr-4"
-        >
+        <button onclick="downloadPunchLog()" class="bg-purple-600 text-white px-5 py-3 rounded-lg shadow-md hover:bg-purple-700 transition mr-4">
             📥 Download Punch Log (Excel)
         </button>
 
-        <button
-            onclick="downloadActivityLog()"
-            class="bg-purple-600 text-white px-5 py-3 rounded-lg shadow-md hover:bg-purple-700 transition"
-        >
+        <button onclick="downloadActivityLog()" class="bg-purple-600 text-white px-5 py-3 rounded-lg shadow-md hover:bg-purple-700 transition">
             📥 Download Activity Log (Excel)
         </button>
     </div>
 
-    <!-- MAP AREA -->
+
+    <!-- =================================================================
+             NEW DASHBOARD MODULE
+    ================================================================== -->
+    <div class="card mb-6">
+        <h3 class="text-2xl font-bold text-purple-700 mb-4">Activity Dashboard</h3>
+
+        <!-- Filters -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+
+            <div>
+                <label class="font-semibold text-gray-700">From Date</label>
+                <input type="date" id="filterFromDate"
+                    class="w-full mt-1 p-2 border rounded-lg" />
+            </div>
+
+            <div>
+                <label class="font-semibold text-gray-700">To Date</label>
+                <input type="date" id="filterToDate"
+                    class="w-full mt-1 p-2 border rounded-lg" />
+            </div>
+
+            <div>
+                <label class="font-semibold text-gray-700">Employee</label>
+                <select id="filterEmployee" class="w-full mt-1 p-2 border rounded-lg">
+                    <option value="">All Employees</option>
+                </select>
+            </div>
+
+        </div>
+
+        <button onclick="loadDashboardData()"
+            class="bg-purple-600 text-white px-6 py-3 rounded-lg shadow-md hover:bg-purple-700 transition mb-6">
+            🔍 Apply Filters
+        </button>
+
+        <!-- Cards -->
+        <div id="dashboardCards" class="grid grid-cols-1 md:grid-cols-5 gap-4"></div>
+
+        <!-- Detail Table -->
+        <div id="dashboardDetailPanel" class="hidden mt-6">
+            <h3 class="text-xl font-bold text-purple-700 mb-4">Detailed Activity Data</h3>
+
+            <button onclick="downloadFilteredData()"
+                class="mb-4 bg-green-600 text-white px-4 py-2 rounded-lg shadow hover:bg-green-700">
+                ⬇ Download Filtered Data
+            </button>
+
+            <div class="overflow-auto">
+                <table class="w-full border border-gray-300 rounded-lg">
+                    <thead class="bg-purple-100">
+                        <tr>
+                            <th class="p-2 border">Date</th>
+                            <th class="p-2 border">Code</th>
+                            <th class="p-2 border">Name</th>
+                            <th class="p-2 border">Time</th>
+                            <th class="p-2 border">Activity</th>
+                            <th class="p-2 border">Location</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dashboardDetailTable"></tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+
+
+    <!-- MAP -->
     <div class="card">
         <h3 class="text-xl font-bold text-purple-700 mb-4">Live User Locations</h3>
         <div id="map"></div>
     </div>
 
-    <!-- ACTIVITY TABLE -->
+
+    <!-- ACTIVITY TABLE (ORIGINAL) -->
     <div class="card">
         <h3 class="text-xl font-bold text-purple-700 mb-4">User Activities</h3>
 
@@ -98,49 +162,197 @@
         </div>
     </div>
 
+
+
+
 <script>
+/* YOUR SAME WEB APP URL */
+const APPS_SCRIPT_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx-2X2o79GBoyiJOsDdax3YIKuoZ1MLV2L3MYT6JVf14PiPuQuNSCtdR2GWbCGvBQZc/exec";
 
-// SAME BACKEND URL
-const APPS_SCRIPT_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyzcm28aP_ucoWIgp66bKXO1HxwYpByrNKN0sfGREKJI-3xVhc13LfUD9MH241xp3YQzg/exec";
 
-/* -----------------------------------
-   INIT FREE MAP (Leaflet + OSM)
------------------------------------ */
-let map = L.map("map").setView([22.97, 78.65], 6);
 
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    maxZoom: 19,
-}).addTo(map);
+/* ============================================================
+   EMPLOYEE DROPDOWN
+============================================================ */
+function loadEmployeeDropdown() {
+    fetch(APPS_SCRIPT_WEB_APP_URL + "?action=getAllEmployees")
+        .then(r => r.json())
+        .then(list => {
+            let html = '<option value="">All Employees</option>';
+            list.forEach(e => {
+                html += `<option value="${e.code}">${e.code} - ${e.name}</option>`;
+            });
+            document.getElementById("filterEmployee").innerHTML = html;
+        });
+}
 
-/* -----------------------------------
-   LOAD USER LAST LOCATIONS (FREE MAP)
------------------------------------ */
-function loadUserLocations() {
-    fetch(APPS_SCRIPT_WEB_APP_URL + "?action=getAllLastLocations")
+
+
+/* ============================================================
+   DASHBOARD FILTER → LOAD SUMMARY
+============================================================ */
+function loadDashboardData() {
+    const fromDate = document.getElementById("filterFromDate").value;
+    const toDate = document.getElementById("filterToDate").value;
+    const emp = document.getElementById("filterEmployee").value;
+
+    fetch(APPS_SCRIPT_WEB_APP_URL + `?action=getDashboardData&from=${fromDate}&to=${toDate}&emp=${emp}`)
         .then(res => res.json())
         .then(data => {
-            data.forEach(user => {
-                if (!user.lat || !user.lon) return;
+            renderDashboardCards(data.summary);
+            window.dashboardFullData = data.rows;
+        });
+}
 
-                // blinking custom HTML icon
-                const iconHtml = L.divIcon({
-                    html: '<div class="blink-icon"></div>',
-                    className: '',
-                    iconSize: [20, 20],
-                    iconAnchor: [10, 10],
-                });
 
-                L.marker([user.lat, user.lon], {
-                    icon: iconHtml
-                }).addTo(map)
-                  .bindPopup(`<b>${user.code}</b><br>${user.name}`);
+
+/* ============================================================
+   SHOW COUNT CARDS
+============================================================ */
+function renderDashboardCards(summary) {
+    let html = "";
+    summary.forEach(item => {
+        html += `
+        <div onclick="showDetail('${item.activityType}')"
+            class="cursor-pointer card p-4 text-center hover:bg-purple-50 transition border border-purple-200">
+
+            <h3 class="text-lg font-semibold text-purple-700">${item.activityType}</h3>
+            <p class="text-3xl font-bold mt-2 text-gray-900">${item.count}</p>
+
+        </div>`;
+    });
+    document.getElementById("dashboardCards").innerHTML = html;
+}
+
+
+
+/* ============================================================
+   SHOW DETAILED TABLE
+============================================================ */
+function showDetail(activityType) {
+    const filtered = window.dashboardFullData.filter(x => x.activity === activityType);
+
+    document.getElementById("dashboardDetailPanel").classList.remove("hidden");
+
+    let html = "";
+    filtered.forEach(r => {
+        html += `
+        <tr>
+            <td class="border p-1">${r.date}</td>
+            <td class="border p-1">${r.code}</td>
+            <td class="border p-1">${r.name}</td>
+            <td class="border p-1">${r.time}</td>
+            <td class="border p-1">${r.activity}</td>
+            <td class="border p-1">${r.location}</td>
+        </tr>`;
+    });
+
+    document.getElementById("dashboardDetailTable").innerHTML = html;
+    window.filteredDataForDownload = filtered;
+}
+
+
+
+/* ============================================================
+   DOWNLOAD FILTERED CSV
+============================================================ */
+function downloadFilteredData() {
+    const data = window.filteredDataForDownload || [];
+    let csv = "Date,Code,Name,Time,Activity,Location\n";
+
+    data.forEach(r => {
+        csv += `${r.date},${r.code},${r.name},${r.time},${r.activity},${r.location}\n`;
+    });
+
+    const blob = new Blob([csv], { type: "text/csv" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "FilteredActivity.csv";
+    a.click();
+}
+
+
+
+
+/* =================================================================
+   MAP INITIALIZATION (NO CHANGE)
+================================================================= */
+let map = L.map("map").setView([22.97, 78.65], 6);
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19 }).addTo(map);
+
+let mapMarkers = [];  // store for clearing before refresh
+
+
+
+
+/* =================================================================
+      UPDATED MAP FUNCTION WITH COLORS
+================================================================= */
+function loadUserLocations() {
+
+    // Clear existing markers
+    mapMarkers.forEach(m => map.removeLayer(m));
+    mapMarkers = [];
+
+    fetch(APPS_SCRIPT_WEB_APP_URL + "?action=getUserWorkStatus")
+        .then(res => res.json())
+        .then(data => {
+
+            data.forEach(u => {
+                if (!u.lat || !u.lon) return;
+
+                let iconHtml = "";
+
+                if (u.status === "blue") {
+                    iconHtml = L.divIcon({
+                        html: '<div class="blink-icon"></div>',
+                        className: '',
+                        iconSize: [20, 20],
+                        iconAnchor: [10, 10],
+                    });
+                }
+
+                if (u.status === "yellow") {
+                    iconHtml = L.divIcon({
+                        html: '<div style="width:16px;height:16px;background:#facc15;border-radius:50%;border:3px solid white;box-shadow:0 0 10px rgba(255,200,0,0.6);"></div>',
+                        className: '',
+                        iconSize: [20, 20],
+                        iconAnchor: [10, 10],
+                    });
+                }
+
+                if (u.status === "red") {
+                    iconHtml = L.divIcon({
+                        html: '<div style="width:16px;height:16px;background:#ef4444;border-radius:50%;border:3px solid white;box-shadow:0 0 10px rgba(255,0,0,0.6);"></div>',
+                        className: '',
+                        iconSize: [20, 20],
+                        iconAnchor: [10, 10],
+                    });
+                }
+
+                let marker = L.marker([u.lat, u.lon], { icon: iconHtml })
+                    .addTo(map)
+                    .bindPopup(`<b>${u.code}</b><br>${u.name}<br>Status: ${u.status.toUpperCase()}`);
+
+                mapMarkers.push(marker);
             });
         });
 }
 
-/* -----------------------------------
-   LOAD ACTIVITY TABLE
------------------------------------ */
+
+
+/* =================================================================
+      AUTO REFRESH MAP EVERY 15 MINUTES
+================================================================= */
+setInterval(() => {
+    loadUserLocations();
+}, 900000); // 900,000 ms = 15 minutes
+
+
+
+/* =================================================================
+   EXISTING FUNCTIONS
+================================================================= */
 function loadActivityLogs() {
     fetch(APPS_SCRIPT_WEB_APP_URL + "?action=getAdminActivity")
         .then(res => res.json())
@@ -160,20 +372,13 @@ function loadActivityLogs() {
         });
 }
 
-/* -----------------------------------
-   DOWNLOAD FUNCTIONS
------------------------------------ */
-function downloadPunchLog() {
-    window.open(APPS_SCRIPT_WEB_APP_URL + "?action=downloadPunchLog", "_blank");
-}
+function downloadPunchLog() { window.open(APPS_SCRIPT_WEB_APP_URL + "?action=downloadPunchLog", "_blank"); }
+function downloadActivityLog() { window.open(APPS_SCRIPT_WEB_APP_URL + "?action=downloadActivityLog", "_blank"); }
 
-function downloadActivityLog() {
-    window.open(APPS_SCRIPT_WEB_APP_URL + "?action=downloadActivityLog", "_blank");
-}
 
-/* -----------------------------------
-   CALL LOAD FUNCTIONS
------------------------------------ */
+
+/* INITIAL LOAD */
+loadEmployeeDropdown();
 loadUserLocations();
 loadActivityLogs();
 
@@ -181,4 +386,5 @@ loadActivityLogs();
 
 </body>
 </html>
+
 
