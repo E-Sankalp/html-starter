@@ -16,1573 +16,938 @@
     body {
       font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: #333;
-      padding: 0;
+      color: #2d3748;
       margin: 0;
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
-      height: 100vh;
-      overflow-y: auto;
-      position: relative;
-      touch-action: manipulation; /* Improves touch responsiveness */
+      align-items: center;
+      padding: 20px;
     }
-    body::before {
-      content: '';
-      position: fixed;
-      top: 0;
-      left: 0;
+    .header {
       width: 100%;
-      height: 100%;
-      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" patternUnits="userSpaceOnUse" width="100" height="100"><circle cx="50" cy="50" r="1" fill="%23ffffff" opacity="0.02"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>') repeat;
-      pointer-events: none;
-      z-index: -1;
-      animation: subtleShift 15s ease-in-out infinite alternate;
+      max-width: 500px;
+      text-align: center;
+      color: white;
+      margin-bottom: 30px;
     }
-    @keyframes subtleShift {
-      0% { opacity: 0.5; }
-      100% { opacity: 1; }
-    }
-    .container {
-      max-width: 100%;
-      padding: 1rem;
-    }
-    h4, h5 {
-      color: #667eea;
-      font-weight: 700;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.1);
-    }
-    .form-input, .form-select, .form-textarea {
-      font-size: 1rem;
-      padding: 1rem;
-      min-height: 3rem;
-      border-radius: 0.75rem;
-      border: 1px solid #c4b5fd;
+    .form-container {
       width: 100%;
-      background-color: #ffffff;
-      transition: border-color 0.3s ease, box-shadow 0.3s ease;
-      -webkit-appearance: none; /* iOS native look removal */
-      appearance: none;
-    }
-    .form-input:focus, .form-select:focus, .form-textarea:focus {
-      border-color: #8b5cf6;
-      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1), 0 2px 8px rgba(0, 0, 0, 0.08);
-      outline: none;
-      transform: translateY(-1px);
-    }
-    .btn {
-      font-size: 1rem;
-      padding: 1rem;
-      min-height: 3.5rem; /* Touch-friendly minimum */
-      border-radius: 0.75rem;
-      transition: all 0.3s ease;
-      font-weight: 600;
-      touch-action: manipulation;
-      -webkit-tap-highlight-color: transparent; /* Reduces tap highlight on mobile */
-    }
-    .btn:hover, .btn:active {
-      transform: translateY(-1px);
+      max-width: 500px;
+      background: #f7fafc;
+      border-radius: 24px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      overflow: hidden;
+      padding: 0;
     }
     .card {
-      border-radius: 1rem;
-      padding: 1.5rem;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      background-color: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(10px);
-      margin-bottom: 1.5rem; /* Added spacing */
+      transition: transform 0.2s;
     }
-    label {
-      margin-top: 0.75rem;
-      font-weight: 500;
-      font-size: 0.9rem;
+    .btn {
+      transition: all 0.3s ease;
+      font-weight: 600;
+      border-radius: 12px;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn:active {
+      transform: scale(0.98);
+    }
+    .input-group {
+      margin-bottom: 20px;
+    }
+    .input-group label {
       display: block;
-      margin-bottom: 0.25rem;
-      color: #555;
-      transition: color 0.3s ease;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #4a5568;
+      margin-bottom: 6px;
     }
-    .input-group:hover label {
-      color: #667eea;
+    .form-input, .form-select {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      background: white;
+      font-size: 1rem;
+      transition: border-color 0.3s;
+    }
+    .form-input:focus, .form-select:focus {
+      outline: none;
+      border-color: #667eea;
     }
     .hidden {
       display: none;
     }
-    textarea {
-      resize: vertical;
-    }
-    #previewImages img {
-      height: 100px;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      margin-right: 8px;
-      margin-top: 8px;
-      max-width: calc(50% - 4px); /* Responsive image grid */
-    }
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background-color: rgba(0, 0, 0, 0.5);
+    /* Menu / Tab Styles */
+    .menu-bar {
       display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1050;
-    }
-    .modal-content-custom {
-      background-color: rgba(255, 255, 255, 0.95);
-      padding: 2rem;
-      border-radius: 1rem;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-width: 200px;
-      max-width: 90vw; /* Responsive modal width */
-      backdrop-filter: blur(10px);
-    }
-    .spinner-border-custom {
-      width: 3.5rem;
-      height: 3.5rem;
-      border: 0.25em solid currentColor;
-      border-right-color: transparent;
-      border-radius: 50%;
-      animation: spinner-border .75s linear infinite;
-      color: #667eea;
-      margin-bottom: 1rem;
-    }
-    @keyframes spinner-border {
-      to { transform: rotate(360deg); }
-    }
-    .text-dark-custom {
-      color: #667eea;
-      font-size: 1.5rem;
-      font-weight: bold;
-    }
-    .toast-container {
-      position: fixed;
-      top: 1rem;
-      right: 1rem;
-      z-index: 1055;
-      max-width: 90vw; /* Responsive toast */
-    }
-    .toast-message {
-      padding: 1rem;
-      border-radius: 0.5rem;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      color: white;
-      font-weight: 600;
-      font-size: 0.9rem;
-      word-wrap: break-word;
-    }
-    .bg-success-toast { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); }
-    .bg-danger-toast { background-color: #dc2626; }
-    .bg-info-toast { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-    .bg-warning-toast { background-color: #d97706; }
-    .select2-container--default .select2-selection--single {
-      border: 1px solid #c4b5fd;
-      border-radius: 0.75rem;
-      min-height: 3rem;
-      background-color: #ffffff;
-      font-size: 1rem;
-      padding: 0.5rem;
-      transition: all 0.3s ease;
-    }
-    .select2-container--default .select2-selection--single .select2-selection__rendered {
-      line-height: 2rem;
-      color: #333;
-    }
-    .select2-container--default .select2-selection--single .select2-selection__arrow {
-      height: 3rem;
-    }
-    .select2-container--default .select2-selection--single:focus {
-      border-color: #8b5cf6;
-      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
-      outline: none;
-      transform: translateY(-1px);
-    }
-    .select2-container--default .select2-dropdown {
-      border: 1px solid #c4b5fd;
-      border-radius: 0.75rem;
-      background-color: #ffffff;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      max-height: 200px; /* Limit dropdown height on mobile */
-      overflow-y: auto;
-    }
-    .select2-container--default .select2-results__option--highlighted[aria-selected] {
-      background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-      color: #ffffff;
-    }
-    .select2-container--default .select2-search--dropdown .select2-search__field {
-      border: 1px solid #c4b5fd;
-      border-radius: 0.5rem;
-      padding: 0.5rem;
-      font-size: 1rem;
-    }
-    .select2-container--default .select2-selection--single.select2-selection--disabled {
-      background-color: #f8f9fa;
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-    .punch-out-banner {
-      background-color: rgba(196, 181, 253, 0.2);
-      color: #667eea;
-      padding: 1rem;
-      border-radius: 0.75rem;
-      margin-bottom: 1rem;
-      font-size: 0.9rem;
-      font-weight: 500;
-      border: 1px solid #c4b5fd;
-    }
-    .header {
-      background: rgba(255, 255, 255, 0.95);
-      padding: 25px 20px;
-      text-align: center;
-      border-bottom: 1px solid #e0e0e0;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-      position: relative;
-      backdrop-filter: blur(10px);
-      animation: headerFade 1s ease-out;
-      margin-bottom: 20px;
-    }
-    @keyframes headerFade {
-      from { opacity: 0; transform: translateY(-10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .form-container {
-      flex: 1;
-      padding: 25px 20px;
-      max-width: 100%;
-      background: rgba(255, 255, 255, 0.95);
-      margin-top: 20px;
-      border-radius: 20px 20px 0 0;
-      box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.1);
-      backdrop-filter: blur(10px);
-      overflow-y: auto; /* Ensure scrollable content */
-    }
-    .input-group {
-      position: relative;
-      margin-bottom: 20px;
-      opacity: 0;
-      transform: translateY(15px);
-      animation: slideUp 0.5s ease-out forwards;
-    }
-    .input-group:nth-child(1) { animation-delay: 0.1s; }
-    .input-group:nth-child(2) { animation-delay: 0.2s; }
-    .input-group:nth-child(3) { animation-delay: 0.3s; }
-    @keyframes slideUp {
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-    .btn-primary {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: #fff;
-      border: none;
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-      animation: buttonPulse 2s ease-in-out infinite alternate;
-    }
-    @keyframes buttonPulse {
-      0% { box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3); }
-      100% { box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4); }
-    }
-    .btn-primary::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-      transition: left 0.5s;
-    }
-    .btn-primary:hover::before {
-      left: 100%;
-    }
-    .btn-primary:hover, .btn-primary:active {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
-    }
-    .btn-secondary {
-      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-      color: #fff;
-      border: none;
-      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-    }
-    .btn-secondary:hover, .btn-secondary:active {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
-    }
-    #status { 
-      margin-top: 20px; 
-      font-size: 14px; 
-      color: #333; 
-      white-space: pre-line; 
-      padding: 16px;
-      background: #f8f9fa;
-      border: 1px solid #e9ecef;
+      background: #edf2f7;
+      padding: 5px;
       border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-      font-weight: 500;
-      opacity: 0;
-      transform: scale(0.95);
-      transition: all 0.4s ease;
+      margin: 15px;
     }
-    #status.show {
-      opacity: 1;
-      transform: scale(1);
-      animation: statusSlide 0.5s ease-out;
+    .menu-tab {
+      flex: 1;
+      text-align: center;
+      padding: 10px 5px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 10px;
+      transition: 0.3s;
+      color: #718096;
     }
-    @keyframes statusSlide {
-      0% { transform: translateX(10px) scale(0.95); }
-      100% { transform: translateX(0) scale(1); }
+    .menu-tab.active {
+      background: white;
+      color: #667eea;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
-    /* Enhanced responsive design */
-    @media (max-width: 640px) { /* sm breakpoint */
-      .header {
-        padding: 20px 15px;
-      }
-      .form-container {
-        padding: 20px 15px;
-        margin-top: 10px;
-        border-radius: 16px 16px 0 0;
-      }
-      h4 {
-        font-size: 1.75rem;
-      }
-      h5 {
-        font-size: 1.25rem;
-      }
-      .form-input, .form-select, .form-textarea, .btn {
-        padding: 1rem;
-        font-size: 16px; /* Prevent zoom on iOS */
-        min-height: 44px; /* Touch target */
-      }
-      .input-group {
-        margin-bottom: 1.5rem;
-      }
-      .card {
-        padding: 1.25rem;
-      }
-      #previewImages img {
-        max-width: calc(100% / 2 - 4px);
-        height: auto;
-        width: auto;
-      }
-      .toast-container {
-        right: 0.5rem;
-        left: 0.5rem;
-        top: 0.5rem;
-      }
-      .toast-message {
-        font-size: 14px;
-        padding: 0.75rem;
-      }
-    }
-    @media (max-width: 480px) {
-      .form-container {
-        padding: 15px 10px;
-      }
-      h4 {
-        font-size: 1.5rem;
-      }
-      .btn {
-        padding: 1.25rem;
-        min-height: 48px; /* Larger touch targets */
-      }
-      .select2-container--default .select2-selection--single {
-        min-height: 48px;
-      }
-      .select2-container--default .select2-selection--single .select2-selection__rendered {
-        line-height: 2.5rem;
-      }
-      .select2-container--default .select2-selection--single .select2-selection__arrow {
-        height: 48px;
-      }
-    }
-    /* PWA-like splash screen */
-    #splash-screen {
+    /* Loading Spinner */
+    .loader-overlay {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(4px);
+      display: none;
       justify-content: center;
+      align-items: center;
       z-index: 9999;
-      animation: fadeOut 0.5s ease-out 2s forwards;
     }
-    @keyframes fadeOut {
-      to { opacity: 0; visibility: hidden; }
+    .loader {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #667eea;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
     }
-    .sales-feedback {
-      display: none; /* Hidden by default, shown via JS */
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
-    .grid {
-      display: grid;
-      gap: 1rem;
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 12px 24px;
+      border-radius: 12px;
+      color: white;
+      font-weight: 500;
+      z-index: 10000;
+      display: none;
+      animation: slideUp 0.3s ease;
     }
-    @media (min-width: 768px) {
-      .grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
+    @keyframes slideUp {
+      from { transform: translate(-50%, 100%); opacity: 0; }
+      to { transform: translate(-50%, 0); opacity: 1; }
+    }
+    .select2-container--default .select2-selection--single {
+      height: 48px !important;
+      padding: 10px !important;
+      border: 2px solid #e2e8f0 !important;
+      border-radius: 12px !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+      height: 46px !important;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+    th, td {
+      border: 1px solid #e2e8f0;
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background: #f7fafc;
     }
   </style>
 </head>
 <body>
-  <!-- Splash screen for app-like feel -->
-  <div id="splash-screen">
-    <div class="spinner-border-custom" style="color: white;"></div>
-    <h4 class="text-white text-xl mt-4">Loading Sankalp Field Attendance...</h4>
+
+  <div id="loaderOverlay" class="loader-overlay">
+    <div class="loader"></div>
   </div>
 
-  <div class="header">
-    <h4 class="text-2xl sm:text-3xl lg:text-4xl text-purple-600 font-bold mb-2">Sankalp Field Attendance</h4>
-  </div>
-  <div class="form-container">
-    <div id="punchOutBanner" class="punch-out-banner hidden">
-      Last Punch Out: <span id="punchOutBannerDetails"></span>
+  <div id="toast" class="toast"></div>
+
+  <header class="header">
+    <h1 class="text-3xl font-bold">Sankalp Field</h1>
+    <p id="welcomeText" class="text-indigo-100 mt-2"></p>
+  </header>
+
+  <section id="loginSection" class="form-container p-8">
+    <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">Login</h2>
+    <div class="input-group">
+      <label>Employee Code</label>
+      <input type="text" id="empCode" class="form-input" placeholder="Enter your code">
     </div>
-    <div id="loginSection" class="card mb-6">
-      <h5 class="text-xl sm:text-2xl lg:text-3xl text-purple-600 font-bold mb-4">Login</h5>
-      <div class="input-group">
-        <label for="code">Employee Code</label>
-        <input
-          id="code"
-          type="text"
-          class="form-input w-full p-3 mb-3 text-lg border border-gray-300 rounded-xl focus:ring-purple-500 focus:border-purple-500"
-          placeholder="Employee Code"
-          autocomplete="off"
-        />
-      </div>
-      <div class="input-group">
-        <label for="password">Password</label>
-        <input
-          id="password"
-          type="password"
-          class="form-input w-full p-3 mb-5 text-lg border border-gray-300 rounded-xl focus:ring-purple-500 focus:border-purple-500"
-          placeholder="Password"
-          autocomplete="current-password"
-        />
-      </div>
-      <button
-        type="button"
-        class="btn btn-primary w-full py-3 text-lg font-semibold rounded-xl hover:bg-purple-700 transition-colors duration-300"
-        onclick="handleLogin()"
-      >
-        Login
-      </button>
+    <div class="input-group">
+      <label>Password</label>
+      <input type="password" id="password" class="form-input" placeholder="••••••••">
     </div>
-    <div id="mainSection" class="hidden">
-      <div class="bg-purple-100 text-purple-800 p-3 rounded-lg mb-4 text-md font-semibold" id="welcomeText"></div>
-      <div class="input-group">
-        <label for="storeSelect">Select Store</label>
-        <select
-          id="storeSelect"
-          class="form-select w-full p-3 mb-3 text-lg border border-gray-300 rounded-xl focus:ring-purple-500 focus:border-purple-500"
-        >
-          <option value="">Select Store</option>
-          <option value="SANKALP RETAIL STORE-KARNAL">SANKALP RETAIL STORE-KARNAL</option>
-          <option value="SANKALP RETAIL STORE-Taraori">SANKALP RETAIL STORE-Taraori</option>
-          <option value="Sankalp Retail Store-Sanoli">Sankalp Retail Store-Sanoli</option>
-          <option value="Sankalp retail store-Devigarh">Sankalp retail store-Devigarh</option>
-          <option value="Sankalp retail store-Patran">Sankalp retail store-Patran</option>
-          <option value="Sankalp retail store-Sunam">Sankalp retail store-Sunam</option>
-          <option value="Sankalp Retail Store-Raikot">Sankalp Retail Store-Raikot</option>
-          <option value="Sankalp Retail Store-Sahnewal">Sankalp Retail Store-Sahnewal</option>
-          <option value="Sankalp Retail Store-Rajpura">Sankalp Retail Store-Rajpura</option>
-          <option value="Sankalp Retail Store-Nabha">Sankalp Retail Store-Nabha</option>
-          <option value="Sankalp Retail Store-Patiala">Sankalp Retail Store-Patiala</option>
-          <option value="Sankalp Retail Store-Khanna">Sankalp Retail Store-Khanna</option>
-          <option value="Sankalp Retail Store-Sangrur">Sankalp Retail Store-Sangrur</option>
-          <option value="Sankalp Retail Store-Malerkotla">Sankalp Retail Store-Malerkotla</option>
-          <option value="Sankalp Retail Store-Charurai">Sankalp Retail Store-Charurai</option>
-          <option value="Sankalp Retail Store-Sanwer">Sankalp Retail Store-Sanwer</option>
-          <option value="Sankalp Retail Store-Depalpur">Sankalp Retail Store-Depalpur</option>
-          <option value="Sankalp Retail Store-Badnawar">Sankalp Retail Store-Badnawar</option>
-          <option value="Sankalp Retail Store-Shajapur">Sankalp Retail Store-Shajapur</option>
-          <option value="Sankalp Retail Store-Maksi">Sankalp Retail Store-Maksi</option>
-          <option value="Sankalp Retail Store-Sehore">Sankalp Retail Store-Sehore</option>
-          <option value="Sankalp Retail Store-Badi">Sankalp Retail Store-Badi</option>
-          <option value="Sankalp Retail Store-Shujalpur">Sankalp Retail Store-Shujalpur</option>
-          <option value="Sankalp Retail Store-Nalkheda">Sankalp Retail Store-Nalkheda</option>
-          <option value="Sankalp Retail Store-Sarangpur">Sankalp Retail Store-Sarangpur</option>
-          <option value="Sankalp Retail Store-Kalapipal">Sankalp Retail Store-Kalapipal</option>
-          <option value="Sankalp Retail Store-Umreth">Sankalp Retail Store-Umreth</option>
-          <option value="Sankalp Retail Store-Akodia">Sankalp Retail Store-Akodia</option>
-          <option value="Sankalp Retail Store-Anantapur">Sankalp Retail Store-Anantapur</option>
-          <option value="Sankalp Retail Store-Ghughali">Sankalp Retail Store-Ghughali</option>
-          <option value="Sankalp Retail Store-Pipiganj">Sankalp Retail Store-Pipiganj</option>
-          <option value="Sankalp Retail Store-Kalyandurg">Sankalp Retail Store-Kalyandurg</option>
-          <option value="SANKALP RETAIL STORE-SHAHABAD">SANKALP RETAIL STORE-SHAHABAD</option>
-          <option value="SANKALP RETAIL STORE-KURUKSHETRA">SANKALP RETAIL STORE-KURUKSHETRA</option>
-          <option value="SANKALP RETAIL STORE-HOSHIARPUR">SANKALP RETAIL STORE-HOSHIARPUR</option>
-          <option value="Sankalp Retail Store-Machhiwara">Sankalp Retail Store-Machhiwara</option>
-          <option value="Sankalp Retail Store-Multai">Sankalp Retail Store-Multai</option>
-          <option value="Sankalp Retail Store-Bareli">Sankalp Retail Store-Bareli</option>
-          <option value="Sankalp Retail Store-Chindwara">Sankalp Retail Store-Chindwara</option>
-          <option value="Sankalp Retail Store-Punganuru">Sankalp Retail Store-Punganuru</option>
-          <option value="Sankalp Retail Store-Kalikiri">Sankalp Retail Store-Kalikiri</option>
-          <option value="Sankalp Retail Store-Rayalcheruvu">Sankalp Retail Store-Rayalcheruvu</option>
-          <option value="Sankalp Retail Store-Pamidi">Sankalp Retail Store-Pamidi</option>
-          <option value="Sankalp Retail Store-Uravakonda">Sankalp Retail Store-Uravakonda</option>
-          <option value="Sankalp Retail Store-Vempalli">Sankalp Retail Store-Vempalli</option>
-          <option value="Sankalp Retail Store-Maktal">Sankalp Retail Store-Maktal</option>
-          <option value="Sankalp Retail Store-Kaptanganj">Sankalp Retail Store-Kaptanganj</option>
-          <option value="Sankalp Retail Store-Raja Talab">Sankalp Retail Store-Raja Talab</option>
-          <option value="Sankalp Retail Store-Kanad">Sankalp Retail Store-Kanad</option>
-          <option value="Sankalp Retail Store-Mahindpur">Sankalp Retail Store-Mahindpur</option>
-          <option value="Sankalp Retail Store-Vidisha">Sankalp Retail Store-Vidisha</option>
-          <option value="Sankalp Retail Store-Ujjain">Sankalp Retail Store-Ujjain</option>
-          <option value="Sankalp Retail Store-Pharenda">Sankalp Retail Store-Pharenda</option>
-          <option value="Sankalp Retail Store-Kalakada">Sankalp Retail Store-Kalakada</option>
-          <option value="Sankalp Retail Store-Chauri Chaura">Sankalp Retail Store-Chauri Chaura</option>
-          <option value="Sankalp Retail Store-Pebbair">Sankalp Retail Store-Pebbair</option>
-          <option value="Sankalp Retail Store-Shanthi Nagar">Sankalp Retail Store-Shanthi Nagar</option>
-          <option value="Sankalp Retail Store-B Kothakota">Sankalp Retail Store-B Kothakota</option>
-          <option value="Sankalp Retail Store-Narpala">Sankalp Retail Store-Narpala</option>
-          <option value="Sankalp Retail Store-Atmakur">Sankalp Retail Store-Atmakur</option>
-          <option value="Sankalp Retail Store-Guntur">Sankalp Retail Store-Guntur</option>
-          <option value="Sankalp Retail Store-Kosigi">Sankalp Retail Store-Kosigi</option>
-          <option value="Sankalp Retail Store-Rayadurg">Sankalp Retail Store-Rayadurg</option>
-          <option value="Sankalp Retail Store-Mudigubba">Sankalp Retail Store-Mudigubba</option>
-          <option value="Sankalp Retail Store-Suryapet">Sankalp Retail Store-Suryapet</option>
-          <option value="Sankalp Retail Store-Tungaturthy">Sankalp Retail Store-Tungaturthy</option>
-          <option value="Sankalp Retail Store-Atmakur-AP">Sankalp Retail Store-Atmakur-AP</option>
-          <option value="Sankalp Retail Store-Kadiri">Sankalp Retail Store-Kadiri</option>
-          <option value="Sankalp Retail Store-Kalwakurthy">Sankalp Retail Store-Kalwakurthy</option>
-          <option value="Sankalp Retail Store-Kothakota">Sankalp Retail Store-Kothakota</option>
-          <option value="Sankalp Retail Store-Nagar Kurnool">Sankalp Retail Store-Nagar Kurnool</option>
-          <option value="Sankalp Retail Store-Devarakonda">Sankalp Retail Store-Devarakonda</option>
-          <option value="Sankalp Retail Store-Dharoor">Sankalp Retail Store-Dharoor</option>
-          <option value="Sankalp Retail Store-Keshampeta">Sankalp Retail Store-Keshampeta</option>
-          <option value="Sankalp Retail Store-Chinnambhavi">Sankalp Retail Store-Chinnambhavi</option>
-          <option value="Sankalp Retail Store-Bathalapalli">Sankalp Retail Store-Bathalapalli</option>
-          <option value="Sankalp Retail Store-Ieeja">Sankalp Retail Store-Ieeja</option>
-          <option value="Sankalp Retail Store-Palakurthy">Sankalp Retail Store-Palakurthy</option>
-          <option value="Sankalp Retail Store-Achampet">Sankalp Retail Store-Achampet</option>
-          <option value="Sankalp Retail Store-Uddhehal">Sankalp Retail Store-Uddhehal</option>
-          <option value="Sankalp Retail Store-Somala">Sankalp Retail Store-Somala</option>
-          <option value="Sankalp Retail Store-Pulivendula">Sankalp Retail Store-Pulivendula</option>
-          <option value="Sankalp Retail Store-Pattikonda">Sankalp Retail Store-Pattikonda</option>
-          <option value="Sankalp Retail Store-Devanakonda">Sankalp Retail Store-Devanakonda</option>
-          <option value="Sankalp Retail Store-Alampur Cross">Sankalp Retail Store-Alampur Cross</option>
-          <option value="Sankalp Retail Store-Galivedu">Sankalp Retail Store-Galivedu</option>
-          <option value="Sankalp Retail Store-Kusumanchi">Sankalp Retail Store-Kusumanchi</option>
-          <option value="Sankalp Retail Store-Vayalpadu">Sankalp Retail Store-Vayalpadu</option>
-          <option value="Sankalp Retail Store-Chippagiri">Sankalp Retail Store-Chippagiri</option>
-          <option value="Sankalp Retail Store-Harda">Sankalp Retail Store-Harda</option>
-          <option value="Sankalp Retail Store-Khategaon">Sankalp Retail Store-Khategaon</option>
-          <option value="Sankalp Retail Store-Gunthakal">Sankalp Retail Store-Gunthakal</option>
-          <option value="Sankalp Retail Store-Kodumur">Sankalp Retail Store-Kodumur</option>
-          <option value="Sankalp Retail Store-Peddavora">Sankalp Retail Store-Peddavora</option>
-          <option value="Sankalp Retail Store-Kollapur">Sankalp Retail Store-Kollapur</option>
-          <option value="Sankalp Retail Store-Thirumalagiri Cross">Sankalp Retail Store-Thirumalagiri Cross</option>
-          <option value="Sankalp Retail Store-Molakalacheruvu">Sankalp Retail Store-Molakalacheruvu</option>
-          <option value="Sankalp Retail Store-Marikal">Sankalp Retail Store-Marikal</option>
-          <option value="Sankalp Retail Store-Beluguppa">Sankalp Retail Store-Beluguppa</option>
-          <option value="Sankalp Retail Store-Shamsabad">Sankalp Retail Store-Shamsabad</option>
-          <option value="Sankalp Retail Store-Vani">Sankalp Retail Store-Vani</option>
-          <option value="Sankalp Retail Store-Pimpalgaon Baswant">Sankalp Retail Store-Pimpalgaon Baswant</option>
-          <option value="Sankalp Retail Store-Jogipet">Sankalp Retail Store-Jogipet</option>
-          <option value="Sankalp Retail Store-Thallada">Sankalp Retail Store-Thallada</option>
-          <option value="Sankalp Retail Store-Valigonda">Sankalp Retail Store-Valigonda</option>
-          <option value="Sankalp Retail Store-Narkhi">Sankalp Retail Store-Narkhi</option>
-          <option value="Sankalp Retail Store-Sasni">Sankalp Retail Store-Sasni</option>
-          <option value="Sankalp Retail Store-Parkal">Sankalp Retail Store-Parkal</option>
-          <option value="Sankalp Retail Store-Mellacheruvu">Sankalp Retail Store-Mellacheruvu</option>
-          <option value="Sankalp Retail Store-Khair">Sankalp Retail Store-Khair</option>
-          <option value="Sankalp Retail Store-Kanekal X Roads">Sankalp Retail Store-Kanekal X Roads</option>
-        </select>
-      </div>
-      <div class="grid mb-6">
-        <button
-          type="button"
-          class="btn btn-primary py-3 text-lg font-semibold rounded-xl transition-colors duration-300 flex items-center justify-center"
-          id="punchInBtn"
-          onclick="handlePunchIn()"
-        >
-          <span class="mr-2"></span> PUNCH IN
-        </button>
-        <button
-          type="button"
-          class="btn btn-secondary py-3 text-lg font-semibold rounded-xl transition-colors duration-300 flex items-center justify-center"
-          id="punchOutBtn"
-          onclick="handlePunchOut()"
-          disabled
-        >
-          <span class="mr-2"></span> PUNCH OUT
-        </button>
-      </div>
-      <div class="input-group">
-        <label for="punchInLocation">Punch In Location</label>
-        <input type="text" class="form-input w-full p-3 text-lg border border-gray-300 rounded-xl bg-gray-100" id="punchInLocation" readonly />
-      </div>
-      <div class="input-group">
-        <label for="punchOutLocation">Punch Out Location</label>
-        <input type="text" class="form-input w-full p-3 text-lg border border-gray-300 rounded-xl bg-gray-100" id="punchOutLocation" readonly />
-      </div>
-      <form id="activityForm" class="card hidden">
-        <h5 class="text-xl sm:text-2xl text-purple-600 font-bold mb-4">Activity Details</h5>
-        <div class="input-group">
-          <label for="storeName">Store Name</label>
-          <input type="text" class="form-input w-full p-3 text-lg border border-gray-300 rounded-xl bg-gray-100" id="storeName" readonly />
+    <button onclick="handleLogin()" class="btn w-full bg-indigo-600 text-white hover:bg-indigo-700">Login</button>
+  </section>
+
+  <main id="mainSection" class="form-container hidden">
+    
+    <div class="menu-bar">
+      <div id="tabAttendance" class="menu-tab active" onclick="switchTab('attendance')">Attendance</div>
+      <div id="tabCustomers" class="menu-tab" onclick="switchTab('customers')">Customer Master</div>
+      <div id="tabSales" class="menu-tab" onclick="switchTab('sales')">Sales Entry</div>
+    </div>
+
+    <div id="moduleAttendance" class="p-6">
+      <div class="card bg-white p-6 rounded-2xl shadow-sm mb-6">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-bold">Punch Log</h3>
+          <span id="punchStatus" class="px-3 py-1 bg-red-100 text-red-600 rounded-full text-xs font-bold uppercase">Punched Out</span>
         </div>
+        
         <div class="input-group">
-          <label for="activityType">Activity Type</label>
-          <select
-            id="activityType"
-            class="form-select w-full p-3 mb-3 text-lg border border-gray-300 rounded-xl focus:ring-purple-500 focus:border-purple-500"
-            onchange="toggleFieldSections()"
-          >
-            <option value="Daily Report">Daily Report</option>
-            <option value="Visit">Visit</option>
+          <label>Select Store</label>
+          <select id="storeSelect" class="form-select select2-enable">
+            <option value="">-- Choose Store --</option>
+            <option value="Sankalp Retail Store-Sangrur">Sankalp Retail Store-Sangrur</option>
+            <option value="Sankalp Retail Store-Malerkotla">Sankalp Retail Store-Malerkotla</option>
+            <option value="Sankalp Retail Store-Patiala">Sankalp Retail Store-Patiala</option>
+            <option value="Sankalp Retail Store-Nabha">Sankalp Retail Store-Nabha</option>
+            <option value="Sankalp Retail Store-Dhuri">Sankalp Retail Store-Dhuri</option>
+            <option value="Sankalp Retail Store-Amargarh">Sankalp Retail Store-Amargarh</option>
+            <option value="Sankalp Retail Store-Ahmedgarh">Sankalp Retail Store-Ahmedgarh</option>
+            <option value="Sankalp Retail Store-Bhawanigarh">Sankalp Retail Store-Bhawanigarh</option>
+            <option value="Sankalp Retail Store-Barnala">Sankalp Retail Store-Barnala</option>
+            <option value="Sankalp Retail Store-Mansa">Sankalp Retail Store-Mansa</option>
+            <option value="Sankalp Retail Store-Budhlada">Sankalp Retail Store-Budhlada</option>
+            <option value="Sankalp Retail Store-Bhikhi">Sankalp Retail Store-Bhikhi</option>
+            <option value="Sankalp Retail Store-Bathinda">Sankalp Retail Store-Bathinda</option>
+            <option value="Sankalp Retail Store-Rampura Phul">Sankalp Retail Store-Rampura Phul</option>
+            <option value="Sankalp Retail Store-Maur Mandi">Sankalp Retail Store-Maur Mandi</option>
+            <option value="Sankalp Retail Store-Talwandi Sabo">Sankalp Retail Store-Talwandi Sabo</option>
+            <option value="Sankalp Retail Store-Faridkot">Sankalp Retail Store-Faridkot</option>
+            <option value="Sankalp Retail Store-Kotkapura">Sankalp Retail Store-Kotkapura</option>
+            <option value="Sankalp Retail Store-Jaitu">Sankalp Retail Store-Jaitu</option>
+            <option value="Sankalp Retail Store-Muktsar">Sankalp Retail Store-Muktsar</option>
+            <option value="Sankalp Retail Store-Malout">Sankalp Retail Store-Malout</option>
+            <option value="Sankalp Retail Store-Gidderbaha">Sankalp Retail Store-Gidderbaha</option>
+            <option value="Sankalp Retail Store-Fazilka">Sankalp Retail Store-Fazilka</option>
+            <option value="Sankalp Retail Store-Abohar">Sankalp Retail Store-Abohar</option>
+            <option value="Sankalp Retail Store-Jalalabad">Sankalp Retail Store-Jalalabad</option>
+            <option value="Sankalp Retail Store-Ferozepur">Sankalp Retail Store-Ferozepur</option>
+            <option value="Sankalp Retail Store-Zira">Sankalp Retail Store-Zira</option>
+            <option value="Sankalp Retail Store-Moga">Sankalp Retail Store-Moga</option>
+            <option value="Sankalp Retail Store-Dharamkot">Sankalp Retail Store-Dharamkot</option>
+            <option value="Sankalp Retail Store-Ludhiana">Sankalp Retail Store-Ludhiana</option>
+            <option value="Sankalp Retail Store-Khanna">Sankalp Retail Store-Khanna</option>
+            <option value="Sankalp Retail Store-Jagraon">Sankalp Retail Store-Jagraon</option>
+            <option value="Sankalp Retail Store-Samrala">Sankalp Retail Store-Samrala</option>
+            <option value="Sankalp Retail Store-Raikot">Sankalp Retail Store-Raikot</option>
+            <option value="Sankalp Retail Store-Doraha">Sankalp Retail Store-Doraha</option>
+            <option value="Sankalp Retail Store-Mullanpur">Sankalp Retail Store-Mullanpur</option>
+            <option value="Sankalp Retail Store-Jalandhar">Sankalp Retail Store-Jalandhar</option>
+            <option value="Sankalp Retail Store-Nakodar">Sankalp Retail Store-Nakodar</option>
+            <option value="Sankalp Retail Store-Shahkot">Sankalp Retail Store-Shahkot</option>
+            <option value="Sankalp Retail Store-Kartarpur">Sankalp Retail Store-Kartarpur</option>
+            <option value="Sankalp Retail Store-Adampur">Sankalp Retail Store-Adampur</option>
+            <option value="Sankalp Retail Store-Phagwara">Sankalp Retail Store-Phagwara</option>
+            <option value="Sankalp Retail Store-Kapurthala">Sankalp Retail Store-Kapurthala</option>
+            <option value="Sankalp Retail Store-Sultanpur Lodhi">Sankalp Retail Store-Sultanpur Lodhi</option>
+            <option value="Sankalp Retail Store-Hoshiarpur">Sankalp Retail Store-Hoshiarpur</option>
+            <option value="Sankalp Retail Store-Dasuya">Sankalp Retail Store-Dasuya</option>
+            <option value="Sankalp Retail Store-Mukerian">Sankalp Retail Store-Mukerian</option>
+            <option value="Sankalp Retail Store-Garhshankar">Sankalp Retail Store-Garhshankar</option>
+            <option value="Sankalp Retail Store-Amritsar">Sankalp Retail Store-Amritsar</option>
+            <option value="Sankalp Retail Store-Ajnala">Sankalp Retail Store-Ajnala</option>
+            <option value="Sankalp Retail Store-Baba Bakala">Sankalp Retail Store-Baba Bakala</option>
+            <option value="Sankalp Retail Store-Tarn Taran">Sankalp Retail Store-Tarn Taran</option>
+            <option value="Sankalp Retail Store-Patti">Sankalp Retail Store-Patti</option>
+            <option value="Sankalp Retail Store-Khadur Sahib">Sankalp Retail Store-Khadur Sahib</option>
+            <option value="Sankalp Retail Store-Gurdaspur">Sankalp Retail Store-Gurdaspur</option>
+            <option value="Sankalp Retail Store-Batala">Sankalp Retail Store-Batala</option>
+            <option value="Sankalp Retail Store-Dera Baba Nanak">Sankalp Retail Store-Dera Baba Nanak</option>
+            <option value="Sankalp Retail Store-Pathankot">Sankalp Retail Store-Pathankot</option>
+            <option value="Sankalp Retail Store-Ropar">Sankalp Retail Store-Ropar</option>
+            <option value="Sankalp Retail Store-Morinda">Sankalp Retail Store-Morinda</option>
+            <option value="Sankalp Retail Store-Nangal">Sankalp Retail Store-Nangal</option>
+            <option value="Sankalp Retail Store-Mohali">Sankalp Retail Store-Mohali</option>
+            <option value="Sankalp Retail Store-Kharar">Sankalp Retail Store-Kharar</option>
+            <option value="Sankalp Retail Store-Dera Bassi">Sankalp Retail Store-Dera Bassi</option>
+            <option value="Sankalp Retail Store-Fatehgarh Sahib">Sankalp Retail Store-Fatehgarh Sahib</option>
+            <option value="Sankalp Retail Store-Sirhind">Sankalp Retail Store-Sirhind</option>
+            <option value="Sankalp Retail Store-Mandi Gobindgarh">Sankalp Retail Store-Mandi Gobindgarh</option>
+          </select>
+        </div>
+
+        <div id="punchButtons" class="grid grid-cols-2 gap-4">
+          <button id="punchInBtn" onclick="handlePunchIn()" class="btn bg-green-500 text-white hover:bg-green-600">Punch In</button>
+          <button id="punchOutBtn" onclick="handlePunchOut()" class="btn bg-red-500 text-white hover:bg-red-600 opacity-50 cursor-not-allowed" disabled>Punch Out</button>
+        </div>
+      </div>
+
+      <div id="activitySection" class="card bg-white p-6 rounded-2xl shadow-sm hidden">
+        <h3 class="text-lg font-bold mb-6">Activity Log</h3>
+        
+        <div class="input-group">
+          <label>Activity Type</label>
+          <select id="activityType" class="form-select">
+            <option value="Dealer Visit">Dealer Visit</option>
+            <option value="Field Day">Field Day</option>
             <option value="Farmer Meeting">Farmer Meeting</option>
-            <option value="Crop Demo">Crop Demo</option>
-            <option value="Calling to schedule meeting">Calling to schedule meeting</option>
-            <option value="Whatsapp Message">Whatsapp Message</option>
-            <option value="Telecalling sale">Telecalling sale</option>
+            <option value="Demo Setup">Demo Setup</option>
           </select>
         </div>
+
         <div class="input-group">
-          <label for="custCategory">Customer Category</label>
-          <select id="custCategory" class="form-select w-full p-3 mb-3 text-lg border border-gray-300 rounded-xl focus:ring-purple-500 focus:border-purple-500">
-            <option value="">Select</option>
-            <option value="Sankalp Partner">Sankalp Partner</option>
-            <option value="Sankalp Mitra">Sankalp Mitra</option>
-            <option value="Farmer">Farmer</option>
+          <label>Message / Remark</label>
+          <textarea id="activityMsg" class="form-input" rows="3" placeholder="Enter details..."></textarea>
+        </div>
+
+        <div class="input-group">
+          <label>Upload Images</label>
+          <input type="file" id="activityImages" class="form-input" accept="image/*" multiple>
+          <div id="imagePreview" class="flex gap-2 mt-2 overflow-x-auto"></div>
+        </div>
+
+        <button onclick="submitActivity()" class="btn w-full bg-indigo-600 text-white hover:bg-indigo-700">Submit Activity</button>
+      </div>
+    </div>
+
+    <div id="moduleCustomers" class="p-6 hidden">
+      <div class="card bg-white p-6 rounded-2xl shadow-sm">
+        <h3 class="text-lg font-bold mb-6 text-indigo-600">Add Customer Details</h3>
+        
+        <div class="input-group">
+          <label>Customer Name</label>
+          <input type="text" id="custName" class="form-input" placeholder="Full Name">
+        </div>
+
+        <div class="input-group">
+          <label>Mobile Number</label>
+          <input type="tel" id="custMobile" class="form-input" placeholder="10 Digit Number">
+        </div>
+
+        <div class="input-group">
+          <label>Customer Type</label>
+          <select id="custType" class="form-select">
+            <option value="Partner">Partner</option>
+            <option value="Mitra">Mitra</option>
           </select>
         </div>
+
         <div class="input-group">
-          <label for="custName">Customer Name</label>
-          <input type="text" class="form-input w-full p-3 mb-3 text-lg border border-gray-300 rounded-xl focus:ring-purple-500 focus:border-purple-500" id="custName" />
+          <label>Select Store</label>
+          <select id="custStore" class="form-select select2-enable">
+            <option value="">-- Choose Store --</option>
+            <option value="Sankalp Retail Store-Sangrur">Sankalp Retail Store-Sangrur</option>
+            <option value="Sankalp Retail Store-Malerkotla">Sankalp Retail Store-Malerkotla</option>
+            <option value="Sankalp Retail Store-Patiala">Sankalp Retail Store-Patiala</option>
+            <option value="Sankalp Retail Store-Nabha">Sankalp Retail Store-Nabha</option>
+            <option value="Sankalp Retail Store-Dhuri">Sankalp Retail Store-Dhuri</option>
+            <option value="Sankalp Retail Store-Amargarh">Sankalp Retail Store-Amargarh</option>
+            <option value="Sankalp Retail Store-Ahmedgarh">Sankalp Retail Store-Ahmedgarh</option>
+            <option value="Sankalp Retail Store-Bhawanigarh">Sankalp Retail Store-Bhawanigarh</option>
+            <option value="Sankalp Retail Store-Barnala">Sankalp Retail Store-Barnala</option>
+            <option value="Sankalp Retail Store-Mansa">Sankalp Retail Store-Mansa</option>
+            <option value="Sankalp Retail Store-Budhlada">Sankalp Retail Store-Budhlada</option>
+            <option value="Sankalp Retail Store-Bhikhi">Sankalp Retail Store-Bhikhi</option>
+            <option value="Sankalp Retail Store-Bathinda">Sankalp Retail Store-Bathinda</option>
+            <option value="Sankalp Retail Store-Rampura Phul">Sankalp Retail Store-Rampura Phul</option>
+            <option value="Sankalp Retail Store-Maur Mandi">Sankalp Retail Store-Maur Mandi</option>
+            <option value="Sankalp Retail Store-Talwandi Sabo">Sankalp Retail Store-Talwandi Sabo</option>
+            <option value="Sankalp Retail Store-Faridkot">Sankalp Retail Store-Faridkot</option>
+            <option value="Sankalp Retail Store-Kotkapura">Sankalp Retail Store-Kotkapura</option>
+            <option value="Sankalp Retail Store-Jaitu">Sankalp Retail Store-Jaitu</option>
+            <option value="Sankalp Retail Store-Muktsar">Sankalp Retail Store-Muktsar</option>
+            <option value="Sankalp Retail Store-Malout">Sankalp Retail Store-Malout</option>
+            <option value="Sankalp Retail Store-Gidderbaha">Sankalp Retail Store-Gidderbaha</option>
+            <option value="Sankalp Retail Store-Fazilka">Sankalp Retail Store-Fazilka</option>
+            <option value="Sankalp Retail Store-Abohar">Sankalp Retail Store-Abohar</option>
+            <option value="Sankalp Retail Store-Jalalabad">Sankalp Retail Store-Jalalabad</option>
+            <option value="Sankalp Retail Store-Ferozepur">Sankalp Retail Store-Ferozepur</option>
+            <option value="Sankalp Retail Store-Zira">Sankalp Retail Store-Zira</option>
+            <option value="Sankalp Retail Store-Moga">Sankalp Retail Store-Moga</option>
+            <option value="Sankalp Retail Store-Dharamkot">Sankalp Retail Store-Dharamkot</option>
+            <option value="Sankalp Retail Store-Ludhiana">Sankalp Retail Store-Ludhiana</option>
+            <option value="Sankalp Retail Store-Khanna">Sankalp Retail Store-Khanna</option>
+            <option value="Sankalp Retail Store-Jagraon">Sankalp Retail Store-Jagraon</option>
+            <option value="Sankalp Retail Store-Samrala">Sankalp Retail Store-Samrala</option>
+            <option value="Sankalp Retail Store-Raikot">Sankalp Retail Store-Raikot</option>
+            <option value="Sankalp Retail Store-Doraha">Sankalp Retail Store-Doraha</option>
+            <option value="Sankalp Retail Store-Mullanpur">Sankalp Retail Store-Mullanpur</option>
+            <option value="Sankalp Retail Store-Jalandhar">Sankalp Retail Store-Jalandhar</option>
+            <option value="Sankalp Retail Store-Nakodar">Sankalp Retail Store-Nakodar</option>
+            <option value="Sankalp Retail Store-Shahkot">Sankalp Retail Store-Shahkot</option>
+            <option value="Sankalp Retail Store-Kartarpur">Sankalp Retail Store-Kartarpur</option>
+            <option value="Sankalp Retail Store-Adampur">Sankalp Retail Store-Adampur</option>
+            <option value="Sankalp Retail Store-Phagwara">Sankalp Retail Store-Phagwara</option>
+            <option value="Sankalp Retail Store-Kapurthala">Sankalp Retail Store-Kapurthala</option>
+            <option value="Sankalp Retail Store-Sultanpur Lodhi">Sankalp Retail Store-Sultanpur Lodhi</option>
+            <option value="Sankalp Retail Store-Hoshiarpur">Sankalp Retail Store-Hoshiarpur</option>
+            <option value="Sankalp Retail Store-Dasuya">Sankalp Retail Store-Dasuya</option>
+            <option value="Sankalp Retail Store-Mukerian">Sankalp Retail Store-Mukerian</option>
+            <option value="Sankalp Retail Store-Garhshankar">Sankalp Retail Store-Garhshankar</option>
+            <option value="Sankalp Retail Store-Amritsar">Sankalp Retail Store-Amritsar</option>
+            <option value="Sankalp Retail Store-Ajnala">Sankalp Retail Store-Ajnala</option>
+            <option value="Sankalp Retail Store-Baba Bakala">Sankalp Retail Store-Baba Bakala</option>
+            <option value="Sankalp Retail Store-Tarn Taran">Sankalp Retail Store-Tarn Taran</option>
+            <option value="Sankalp Retail Store-Patti">Sankalp Retail Store-Patti</option>
+            <option value="Sankalp Retail Store-Khadur Sahib">Sankalp Retail Store-Khadur Sahib</option>
+            <option value="Sankalp Retail Store-Gurdaspur">Sankalp Retail Store-Gurdaspur</option>
+            <option value="Sankalp Retail Store-Batala">Sankalp Retail Store-Batala</option>
+            <option value="Sankalp Retail Store-Dera Baba Nanak">Sankalp Retail Store-Dera Baba Nanak</option>
+            <option value="Sankalp Retail Store-Pathankot">Sankalp Retail Store-Pathankot</option>
+            <option value="Sankalp Retail Store-Ropar">Sankalp Retail Store-Ropar</option>
+            <option value="Sankalp Retail Store-Morinda">Sankalp Retail Store-Morinda</option>
+            <option value="Sankalp Retail Store-Nangal">Sankalp Retail Store-Nangal</option>
+            <option value="Sankalp Retail Store-Mohali">Sankalp Retail Store-Mohali</option>
+            <option value="Sankalp Retail Store-Kharar">Sankalp Retail Store-Kharar</option>
+            <option value="Sankalp Retail Store-Dera Bassi">Sankalp Retail Store-Dera Bassi</option>
+            <option value="Sankalp Retail Store-Fatehgarh Sahib">Sankalp Retail Store-Fatehgarh Sahib</option>
+            <option value="Sankalp Retail Store-Sirhind">Sankalp Retail Store-Sirhind</option>
+            <option value="Sankalp Retail Store-Mandi Gobindgarh">Sankalp Retail Store-Mandi Gobindgarh</option>
+          </select>
         </div>
+
+        <button onclick="submitCustomerMaster()" class="btn w-full bg-purple-600 text-white hover:bg-purple-700 mt-4">Save Customer</button>
+      </div>
+
+      <div class="card bg-white p-6 rounded-2xl shadow-sm mt-6">
+        <h3 class="text-lg font-bold mb-4">Your Customers</h3>
         <div class="input-group">
-          <label for="mobile">Mobile Number</label>
-          <input
-            type="tel"
-            class="form-input w-full p-3 mb-3 text-lg border border-gray-300 rounded-xl focus:ring-purple-500 focus:border-purple-500"
-            id="mobile"
-            placeholder="e.g., 9876543210 (10-digits)"
-            maxlength="10"
-            inputmode="numeric"
-          />
+          <label>Filter Month</label>
+          <select id="custMonthFilter" class="form-select" onchange="loadCustomerData()">
+            <option value="">All Time</option>
+          </select>
         </div>
-        <div class="input-group">
-          <label for="location">Location</label>
-          <input type="text" class="form-input w-full p-3 mb-3 text-lg border border-gray-300 rounded-xl bg-gray-100" id="location" readonly placeholder="Fetching GPS..." />
-        </div>
-        <div class="input-group">
-          <label for="message">Message</label>
-          <textarea class="form-textarea w-full p-3 mb-3 text-lg border border-gray-300 rounded-xl focus:ring-purple-500 focus:border-purple-500 resize-y min-h-[100px]" id="message"></textarea>
-        </div>
-        <div class="sales-feedback">
-          <div class="input-group">
-            <label for="product">Product</label>
-            <input type="text" class="form-input w-full p-3 mb-3 text-lg border border-gray-300 rounded-xl focus:ring-purple-500 focus:border-purple-500" id="product" />
-          </div>
-          <div class="input-group">
-            <label for="cpc">CPC Sale</label>
-            <input type="number" class="form-input w-full p-3 mb-3 text-lg border border-gray-300 rounded-xl focus:ring-purple-500 focus:border-purple-500" id="cpc" inputmode="numeric" />
-          </div>
-          <div class="input-group">
-            <label for="snd">SND Sale</label>
-            <input type="number" class="form-input w-full p-3 mb-3 text-lg border border-gray-300 rounded-xl focus:ring-purple-500 focus:border-purple-500" id="snd" inputmode="numeric" />
-          </div>
-          <div class="input-group">
-            <label for="seed">SEED Sale</label>
-            <input type="number" class="form-input w-full p-3 mb-3 text-lg border border-gray-300 rounded-xl focus:ring-purple-500 focus:border-purple-500" id="seed" inputmode="numeric" />
-          </div>
-          <div class="input-group">
-            <label for="feq">FEQ Sale</label>
-            <input type="number" class="form-input w-full p-3 mb-3 text-lg border border-gray-300 rounded-xl focus:ring-purple-500 focus:border-purple-500" id="feq" inputmode="numeric" />
-          </div>
-          <div class="input-group">
-            <label for="vet">VET Sale</label>
-            <input type="number" class="form-input w-full p-3 mb-3 text-lg border border-gray-300 rounded-xl focus:ring-purple-500 focus:border-purple-500" id="vet" inputmode="numeric" />
-          </div>
-          <div class="input-group">
-            <label for="wentWell">What Went Well</label>
-            <textarea class="form-textarea w-full p-3 mb-3 text-lg border border-gray-300 rounded-xl focus:ring-purple-500 focus:border-purple-500 resize-y min-h-[100px]" id="wentWell"></textarea>
-          </div>
-          <div class="input-group">
-            <label for="notWell">What Did Not Go Well</label>
-            <textarea class="form-textarea w-full p-3 mb-3 text-lg border border-gray-300 rounded-xl focus:ring-purple-500 focus:border-purple-500 resize-y min-h-[100px]" id="notWell"></textarea>
-          </div>
-          <div class="input-group">
-            <label for="improve">How I Will Improve</label>
-            <textarea class="form-textarea w-full p-3 mb-3 text-lg border border-gray-300 rounded-xl focus:ring-purple-500 focus:border-purple-500 resize-y min-h-[100px]" id="improve"></textarea>
-          </div>
-          <div class="input-group">
-            <label for="support">Support Required</label>
-            <textarea class="form-textarea w-full p-3 mb-3 text-lg border border-gray-300 rounded-xl focus:ring-purple-500 focus:border-purple-500 resize-y min-h-[100px]" id="support"></textarea>
-          </div>
-        </div>
-        <div class="input-group">
-          <label for="images">Upload Images</label>
-          <input
-            type="file"
-            class="form-input w-full p-3 mb-3 text-lg border border-gray-300 rounded-xl focus:ring-purple-500 focus:border-purple-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100"
-            id="images"
-            multiple
-            accept="image/*"
-          />
-        </div>
-        <div id="previewImages" class="mt-2 flex flex-wrap gap-2"></div>
-        <button
-          type="button"
-          class="btn btn-primary w-full py-3 text-lg font-semibold rounded-xl transition-colors duration-300 mt-5"
-          onclick="submitActivity()"
-        >
-          Submit Activity
-        </button>
-      </form>
+        <table id="custTable" class="w-full text-sm">
+          <thead><tr><th>Date</th><th>Store</th><th>Name</th><th>Mobile</th><th>Type</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
     </div>
-  </div>
-  <div id="loadingModal" class="modal-overlay hidden">
-    <div class="modal-content-custom">
-      <div class="spinner-border-custom" role="status"></div>
-      <div class="text-dark-custom">Processing...</div>
+
+    <div id="moduleSales" class="p-6 hidden">
+      <div class="card bg-white p-6 rounded-2xl shadow-sm">
+        <h3 class="text-lg font-bold mb-6 text-green-600">New Sale Entry</h3>
+        
+        <div class="input-group">
+          <label>Select Customer</label>
+          <select id="saleCustomerSelect" class="form-select select2-enable">
+            <option value="">-- Select Customer --</option>
+          </select>
+        </div>
+
+        <div class="input-group">
+          <label>Item / Product Name</label>
+          <input type="text" id="saleItem" class="form-input" placeholder="What was sold?">
+        </div>
+
+        <div class="input-group">
+          <label>Sale Amount (₹)</label>
+          <input type="number" id="saleAmount" class="form-input" placeholder="0.00">
+        </div>
+
+        <div class="input-group">
+          <label>Select Store</label>
+          <select id="saleStore" class="form-select select2-enable">
+            <option value="">-- Choose Store --</option>
+            <option value="Sankalp Retail Store-Sangrur">Sankalp Retail Store-Sangrur</option>
+            <option value="Sankalp Retail Store-Malerkotla">Sankalp Retail Store-Malerkotla</option>
+            <option value="Sankalp Retail Store-Patiala">Sankalp Retail Store-Patiala</option>
+            <option value="Sankalp Retail Store-Nabha">Sankalp Retail Store-Nabha</option>
+            <option value="Sankalp Retail Store-Dhuri">Sankalp Retail Store-Dhuri</option>
+            <option value="Sankalp Retail Store-Amargarh">Sankalp Retail Store-Amargarh</option>
+            <option value="Sankalp Retail Store-Ahmedgarh">Sankalp Retail Store-Ahmedgarh</option>
+            <option value="Sankalp Retail Store-Bhawanigarh">Sankalp Retail Store-Bhawanigarh</option>
+            <option value="Sankalp Retail Store-Barnala">Sankalp Retail Store-Barnala</option>
+            <option value="Sankalp Retail Store-Mansa">Sankalp Retail Store-Mansa</option>
+            <option value="Sankalp Retail Store-Budhlada">Sankalp Retail Store-Budhlada</option>
+            <option value="Sankalp Retail Store-Bhikhi">Sankalp Retail Store-Bhikhi</option>
+            <option value="Sankalp Retail Store-Bathinda">Sankalp Retail Store-Bathinda</option>
+            <option value="Sankalp Retail Store-Rampura Phul">Sankalp Retail Store-Rampura Phul</option>
+            <option value="Sankalp Retail Store-Maur Mandi">Sankalp Retail Store-Maur Mandi</option>
+            <option value="Sankalp Retail Store-Talwandi Sabo">Sankalp Retail Store-Talwandi Sabo</option>
+            <option value="Sankalp Retail Store-Faridkot">Sankalp Retail Store-Faridkot</option>
+            <option value="Sankalp Retail Store-Kotkapura">Sankalp Retail Store-Kotkapura</option>
+            <option value="Sankalp Retail Store-Jaitu">Sankalp Retail Store-Jaitu</option>
+            <option value="Sankalp Retail Store-Muktsar">Sankalp Retail Store-Muktsar</option>
+            <option value="Sankalp Retail Store-Malout">Sankalp Retail Store-Malout</option>
+            <option value="Sankalp Retail Store-Gidderbaha">Sankalp Retail Store-Gidderbaha</option>
+            <option value="Sankalp Retail Store-Fazilka">Sankalp Retail Store-Fazilka</option>
+            <option value="Sankalp Retail Store-Abohar">Sankalp Retail Store-Abohar</option>
+            <option value="Sankalp Retail Store-Jalalabad">Sankalp Retail Store-Jalalabad</option>
+            <option value="Sankalp Retail Store-Ferozepur">Sankalp Retail Store-Ferozepur</option>
+            <option value="Sankalp Retail Store-Zira">Sankalp Retail Store-Zira</option>
+            <option value="Sankalp Retail Store-Moga">Sankalp Retail Store-Moga</option>
+            <option value="Sankalp Retail Store-Dharamkot">Sankalp Retail Store-Dharamkot</option>
+            <option value="Sankalp Retail Store-Ludhiana">Sankalp Retail Store-Ludhiana</option>
+            <option value="Sankalp Retail Store-Khanna">Sankalp Retail Store-Khanna</option>
+            <option value="Sankalp Retail Store-Jagraon">Sankalp Retail Store-Jagraon</option>
+            <option value="Sankalp Retail Store-Samrala">Sankalp Retail Store-Samrala</option>
+            <option value="Sankalp Retail Store-Raikot">Sankalp Retail Store-Raikot</option>
+            <option value="Sankalp Retail Store-Doraha">Sankalp Retail Store-Doraha</option>
+            <option value="Sankalp Retail Store-Mullanpur">Sankalp Retail Store-Mullanpur</option>
+            <option value="Sankalp Retail Store-Jalandhar">Sankalp Retail Store-Jalandhar</option>
+            <option value="Sankalp Retail Store-Nakodar">Sankalp Retail Store-Nakodar</option>
+            <option value="Sankalp Retail Store-Shahkot">Sankalp Retail Store-Shahkot</option>
+            <option value="Sankalp Retail Store-Kartarpur">Sankalp Retail Store-Kartarpur</option>
+            <option value="Sankalp Retail Store-Adampur">Sankalp Retail Store-Adampur</option>
+            <option value="Sankalp Retail Store-Phagwara">Sankalp Retail Store-Phagwara</option>
+            <option value="Sankalp Retail Store-Kapurthala">Sankalp Retail Store-Kapurthala</option>
+            <option value="Sankalp Retail Store-Sultanpur Lodhi">Sankalp Retail Store-Sultanpur Lodhi</option>
+            <option value="Sankalp Retail Store-Hoshiarpur">Sankalp Retail Store-Hoshiarpur</option>
+            <option value="Sankalp Retail Store-Dasuya">Sankalp Retail Store-Dasuya</option>
+            <option value="Sankalp Retail Store-Mukerian">Sankalp Retail Store-Mukerian</option>
+            <option value="Sankalp Retail Store-Garhshankar">Sankalp Retail Store-Garhshankar</option>
+            <option value="Sankalp Retail Store-Amritsar">Sankalp Retail Store-Amritsar</option>
+            <option value="Sankalp Retail Store-Ajnala">Sankalp Retail Store-Ajnala</option>
+            <option value="Sankalp Retail Store-Baba Bakala">Sankalp Retail Store-Baba Bakala</option>
+            <option value="Sankalp Retail Store-Tarn Taran">Sankalp Retail Store-Tarn Taran</option>
+            <option value="Sankalp Retail Store-Patti">Sankalp Retail Store-Patti</option>
+            <option value="Sankalp Retail Store-Khadur Sahib">Sankalp Retail Store-Khadur Sahib</option>
+            <option value="Sankalp Retail Store-Gurdaspur">Sankalp Retail Store-Gurdaspur</option>
+            <option value="Sankalp Retail Store-Batala">Sankalp Retail Store-Batala</option>
+            <option value="Sankalp Retail Store-Dera Baba Nanak">Sankalp Retail Store-Dera Baba Nanak</option>
+            <option value="Sankalp Retail Store-Pathankot">Sankalp Retail Store-Pathankot</option>
+            <option value="Sankalp Retail Store-Ropar">Sankalp Retail Store-Ropar</option>
+            <option value="Sankalp Retail Store-Morinda">Sankalp Retail Store-Morinda</option>
+            <option value="Sankalp Retail Store-Nangal">Sankalp Retail Store-Nangal</option>
+            <option value="Sankalp Retail Store-Mohali">Sankalp Retail Store-Mohali</option>
+            <option value="Sankalp Retail Store-Kharar">Sankalp Retail Store-Kharar</option>
+            <option value="Sankalp Retail Store-Dera Bassi">Sankalp Retail Store-Dera Bassi</option>
+            <option value="Sankalp Retail Store-Fatehgarh Sahib">Sankalp Retail Store-Fatehgarh Sahib</option>
+            <option value="Sankalp Retail Store-Sirhind">Sankalp Retail Store-Sirhind</option>
+            <option value="Sankalp Retail Store-Mandi Gobindgarh">Sankalp Retail Store-Mandi Gobindgarh</option>
+          </select>
+        </div>
+
+        <button onclick="submitSalesEntry()" class="btn w-full bg-green-600 text-white hover:bg-green-700 mt-4">Record Sale</button>
+      </div>
+
+      <div class="card bg-white p-6 rounded-2xl shadow-sm mt-6">
+        <h3 class="text-lg font-bold mb-4">Your Sales</h3>
+        <div class="input-group">
+          <label>Filter Month</label>
+          <select id="salesMonthFilter" class="form-select" onchange="loadSalesData()">
+            <option value="">All Time</option>
+          </select>
+        </div>
+        <table id="salesTable" class="w-full text-sm">
+          <thead><tr><th>Date</th><th>Store</th><th>Customer</th><th>Item</th><th>Amount</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
     </div>
-  </div>
-  <div id="toastContainer" class="toast-container"></div>
+
+  </main>
+
   <script>
-    const APPS_SCRIPT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxbCOhYzag9-60ytNWcGYowZPjmUQsvfPuTax-IRaeOioswtcv1FOb3EabkTIdNxJGeNQ/exec';
+    const APPS_SCRIPT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycby16l4HL16KQEODvZDiHt4Q7qEEaMZnIyfXbaguWpwolMmg8O5oog3duilIhu9R4aUDCA/exec';
     let user = null;
-    let punchInData = null; // { lat, lon, time, store }
-    let punchOutData = null; // { lat, lon, time }
-    let loading = false;
-    let loadingTimeout = null;
-    let toast = { message: '', type: '' };
-    let activityFormVisible = false;
-    let punchInBtnDisabled = false;
-    let punchOutBtnDisabled = true;
-    let resizedImagesData = [];
-    const loginSection = document.getElementById('loginSection');
-    const mainSection = document.getElementById('mainSection');
-    const welcomeText = document.getElementById('welcomeText');
-    const employeeCodeInput = document.getElementById('code');
-    const passwordInput = document.getElementById('password');
-    const storeSelect = document.getElementById('storeSelect');
-    const punchInBtn = document.getElementById('punchInBtn');
-    const punchOutBtn = document.getElementById('punchOutBtn');
-    const punchInLocationInput = document.getElementById('punchInLocation');
-    const punchOutLocationInput = document.getElementById('punchOutLocation');
-    const activityForm = document.getElementById('activityForm');
-    const activityTypeSelect = document.getElementById('activityType');
-    const custCategorySelect = document.getElementById('custCategory');
-    const custNameInput = document.getElementById('custName');
-    const mobileInput = document.getElementById('mobile');
-    const activityLocationInput = document.getElementById('location');
-    const storeNameInput = document.getElementById('storeName');
-    const messageTextarea = document.getElementById('message');
-    const productInput = document.getElementById('product');
-    const cpcInput = document.getElementById('cpc');
-    const sndInput = document.getElementById('snd');
-    const seedInput = document.getElementById('seed');
-    const feqInput = document.getElementById('feq');
-    const vetInput = document.getElementById('vet');
-    const wentWellTextarea = document.getElementById('wentWell');
-    const notWellTextarea = document.getElementById('notWell');
-    const improveTextarea = document.getElementById('improve');
-    const supportTextarea = document.getElementById('support');
-    const imagesInput = document.getElementById('images');
-    const previewImagesDiv = document.getElementById('previewImages');
-    const salesFeedbackSection = document.querySelector('.sales-feedback');
-    const loadingModal = document.getElementById('loadingModal');
-    const toastContainer = document.getElementById('toastContainer');
-    const punchOutBanner = document.getElementById('punchOutBanner');
-    const punchOutBannerDetails = document.getElementById('punchOutBannerDetails');
-    const splashScreen = document.getElementById('splash-screen');
+    let punchInData = null;
 
-    const haversineDistance = (lat1, lon1, lat2, lon2) => {
-      const R = 6371;
-      const dLat = (lat2 - lat1) * Math.PI / 180;
-      const dLon = (lon2 - lon1) * Math.PI / 180;
-      const a =
-        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-        Math.sin(dLon / 2) * Math.sin(dLon / 2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      const distance = R * c;
-      return distance.toFixed(2);
-    };
-
-    function updateUI() {
-      if (loading) {
-        loadingModal.classList.remove('hidden');
-      } else {
-        loadingModal.classList.add('hidden');
-      }
-      if (user) {
-        loginSection.classList.add('hidden');
-        mainSection.classList.remove('hidden');
-        welcomeText.innerText = `Welcome, ${user.name}`;
-        punchInBtn.disabled = punchInBtnDisabled;
-        punchOutBtn.disabled = punchOutBtnDisabled;
-        if (activityFormVisible) {
-          activityForm.classList.remove('hidden');
-          storeNameInput.value = punchInData && punchInData.store ? punchInData.store : '';
-        } else {
-          activityForm.classList.add('hidden');
-        }
-      } else {
-        loginSection.classList.remove('hidden');
-        mainSection.classList.add('hidden');
-        storeSelect.disabled = false;
-        if (typeof $ !== 'undefined' && $.fn.select2) {
-          $('#storeSelect').select2('enable', true);
-        }
-      }
-      // Show punch-out banner if punchOutData exists
-      if (punchOutData && !user) {
-        punchOutBanner.classList.remove('hidden');
-        punchOutBannerDetails.innerText = `Location: ${punchOutData.lat}, ${punchOutData.lon} at ${new Date(punchOutData.time).toLocaleString()}`;
-      } else {
-        punchOutBanner.classList.add('hidden');
-      }
-      // Sync Select2 state with native select
-      if (storeSelect.disabled && typeof $ !== 'undefined' && $.fn.select2) {
-        $('#storeSelect').select2('enable', false);
-      } else if (typeof $ !== 'undefined' && $.fn.select2) {
-        $('#storeSelect').select2('enable', true);
-      }
-      // Force re-check disabled state
-      if (!punchInData && storeSelect.disabled) {
-        storeSelect.disabled = false;
-        if (typeof $ !== 'undefined' && $.fn.select2) {
-          $('#storeSelect').select2('enable', true);
-        }
-        storeSelect.removeAttribute('disabled');
-      }
-    }
-
-    function showLoader() {
-      if (!loading) {
-        loading = true;
-        loadingTimeout = setTimeout(() => {
-          forceHideLoader();
-          showToast('Operation took too long. Please try again.', 'warning');
-        }, 30000);
-        updateUI();
-      }
-    }
-
-    function forceHideLoader() {
-      loading = false;
-      if (loadingTimeout) {
-        clearTimeout(loadingTimeout);
-        loadingTimeout = null;
-      }
-      loadingModal.classList.add('hidden');
-      updateUI();
-    }
-
-    function hideLoader() {
-      if (loading) {
-        loading = false;
-        if (loadingTimeout) {
-          clearTimeout(loadingTimeout);
-          loadingTimeout = null;
-        }
-        loadingModal.classList.add('hidden');
-        updateUI();
-      }
-    }
-
-    function showToast(msg, type = 'info') {
-      const id = "toast" + Date.now();
-      const bgClass = {
-        success: "bg-success-toast",
-        error: "bg-danger-toast",
-        info: "bg-info-toast",
-        warning: "bg-warning-toast"
-      }[type] || "bg-info-toast";
-      const toastElement = document.createElement("div");
-      toastElement.className = `toast-message ${bgClass} show`;
-      toastElement.id = id;
-      toastElement.setAttribute("role", "alert");
-      toastElement.setAttribute("aria-live", "assertive");
-      toastElement.setAttribute("aria-atomic", "true");
-      toastElement.innerHTML = `
-        <div class="flex items-center justify-between">
-          <div class="toast-body">${msg}</div>
-          <button type="button" class="ml-4 text-white opacity-70 hover:opacity-100 focus:outline-none" onclick="document.getElementById('${id}').remove()" aria-label="Close">&times;</button>
-        </div>`;
-      toastContainer.appendChild(toastElement);
-      setTimeout(() => {
-        if (toastElement.parentNode) {
-          toastElement.remove();
-        }
-      }, 4000);
-    }
-
-    const getGeoLocation = () => {
-      return new Promise((resolve, reject) => {
-        if ("geolocation" in navigator) {
-          navigator.geolocation.getCurrentPosition(
-            (pos) => resolve(pos),
-            (error) => {
-              let msg = "Location unavailable";
-              if (error.code === error.PERMISSION_DENIED) {
-                msg = "Location permission denied. Please enable it in settings.";
-              } else if (error.code === error.POSITION_UNAVAILABLE) {
-                msg = "Location information is unavailable.";
-              } else if (error.code === error.TIMEOUT) {
-                msg = "The request to get user location timed out.";
-              }
-              reject(new Error(msg));
-            },
-            { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
-          );
-        } else {
-          reject(new Error("Geolocation is not supported by your browser."));
-        }
+    // TABS SWITCHING LOGIC
+    function switchTab(tab) {
+      // Manage CSS active state
+      document.querySelectorAll('.menu-tab').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('#mainSection > div').forEach(el => {
+        if(el.id.startsWith('module')) el.classList.add('hidden');
       });
-    };
 
-    async function sendToAppsScript(action, payload, retries = 2) {
-      if (!APPS_SCRIPT_WEB_APP_URL || APPS_SCRIPT_WEB_APP_URL.includes('YOUR_APPS_SCRIPT_WEB_APP_URL')) {
-        throw new Error("Apps Script Web App URL is not configured correctly. Please update APPS_SCRIPT_WEB_APP_URL in the HTML.");
+      if (tab === 'attendance') {
+        document.getElementById('tabAttendance').classList.add('active');
+        document.getElementById('moduleAttendance').classList.remove('hidden');
+      } else if (tab === 'customers') {
+        document.getElementById('tabCustomers').classList.add('active');
+        document.getElementById('moduleCustomers').classList.remove('hidden');
+        loadCustomerData();
+      } else if (tab === 'sales') {
+        document.getElementById('tabSales').classList.add('active');
+        document.getElementById('moduleSales').classList.remove('hidden');
+        loadSalesData();
       }
-      const url = new URL(APPS_SCRIPT_WEB_APP_URL);
-      url.searchParams.append('action', action);
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000);
-      try {
-        const response = await fetch(url.toString(), {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain' },
-          body: JSON.stringify(payload),
-          signal: controller.signal
-        });
-        clearTimeout(timeoutId);
-        if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(`Server error: ${response.status} - ${errorText}`);
-        }
-        const responseText = await response.text();
-        try {
-          return JSON.parse(responseText);
-        } catch (e) {
-          console.warn("Apps Script response was not JSON:", responseText);
-          return { success: false, message: "Invalid server response format" };
-        }
-      } catch (error) {
-        clearTimeout(timeoutId);
-        console.error(`sendToAppsScript failed for action ${action}:`, error);
-        if (retries > 0 && error.name !== 'AbortError') {
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          return sendToAppsScript(action, payload, retries - 1);
-        }
-        throw error.name === 'AbortError' ? new Error('Request timed out') : error;
-      }
+
+      // Refresh Select2 width if needed
+      $('.select2-enable').select2({ width: '100%' });
     }
 
+    /* ================= AUTH ================= */
     async function handleLogin() {
-      const code = employeeCodeInput.value.trim();
-      const pass = passwordInput.value.trim();
-      if (!code || !pass) {
-        return showToast("Enter employee code and password", "warning");
-      }
+      const code = document.getElementById('empCode').value.trim();
+      const password = document.getElementById('password').value.trim();
+      if (!code || !password) { showToast("Enter credentials", "error"); return; }
+      
       showLoader();
       try {
-        const res = await sendToAppsScript('verifyLogin', { code, password: pass });
-        if (!res || !res.user) {
-          throw new Error(res.message || 'Invalid credentials');
+        const res = await sendToAppsScript('verifyLogin', { code, password });
+        if (res.success) {
+          user = res.user;
+          document.getElementById('loginSection').classList.add('hidden');
+          document.getElementById('mainSection').classList.remove('hidden');
+          document.getElementById('welcomeText').innerText = `Welcome, ${user.name}`;
+          populateMonths('custMonthFilter');
+          populateMonths('salesMonthFilter');
+          checkPunchStatus(user.code);
+        } else {
+          showToast(res.message, "error");
         }
-        user = res.user;
-        sessionStorage.setItem("user", JSON.stringify(user));
-        showToast(`Welcome, ${user.name}`, "success");
-        await checkPunchStatus(user.code);
       } catch (err) {
-        showToast("Login failed: " + err.message, "error");
+        showToast("Login failed", "error");
       } finally {
         hideLoader();
       }
     }
 
-    async function handlePunchIn() {
-      if (!user) {
-        showToast("Please log in first.", "error");
+    /* ================= CUSTOMER MASTER ================= */
+    async function submitCustomerMaster() {
+      const name = document.getElementById('custName').value.trim();
+      const mobile = document.getElementById('custMobile').value.trim();
+      const type = document.getElementById('custType').value;
+      const store = document.getElementById('custStore').value;
+
+      if (!name || !mobile || !type || !store) {
+        showToast("Fill all customer fields", "error");
         return;
       }
-      const store = storeSelect.value.trim();
-      if (!store) {
-        showToast("Please select a store.", "warning");
-        return;
-      }
+
       showLoader();
       try {
-        const pos = await getGeoLocation();
-        const now = new Date().toISOString();
-        const newPunchInData = { lat: pos.coords.latitude, lon: pos.coords.longitude, time: now, store, code: user.code };
+        const res = await sendToAppsScript('saveCustomer', {
+          code: user.code,
+          store: store,
+          name: name,
+          mobile: mobile,
+          type: type
+        });
+        if (res.success) {
+          showToast("Customer saved!", "success");
+          document.getElementById('custName').value = '';
+          document.getElementById('custMobile').value = '';
+          $('#custStore').val(null).trigger('change');
+          loadCustomerData();
+        } else {
+          showToast(res.message, "error");
+        }
+      } catch (err) {
+        showToast("Save failed", "error");
+      } finally {
+        hideLoader();
+      }
+    }
+
+    async function loadCustomerData() {
+      const month = document.getElementById('custMonthFilter').value;
+      try {
+        const data = await fetchFromAppsScript('getUserCustomers', {code: user.code, month});
+        const tbody = document.querySelector('#custTable tbody');
+        tbody.innerHTML = '';
+        data.forEach(row => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${new Date(row.timestamp).toLocaleDateString()}</td><td>${row.store}</td><td>${row.name}</td><td>${row.mobile}</td><td>${row.type}</td>`;
+          tbody.appendChild(tr);
+        });
+      } catch (err) {
+        showToast("Failed to load customers", "error");
+      }
+    }
+
+    /* ================= SALES ENTRY ================= */
+    async function submitSalesEntry() {
+      const customer = document.getElementById('saleCustomerSelect').value;
+      const item = document.getElementById('saleItem').value.trim();
+      const amount = document.getElementById('saleAmount').value.trim();
+      const store = document.getElementById('saleStore').value;
+
+      if (!customer || !item || !amount || !store) {
+        showToast("Fill all sales fields", "error");
+        return;
+      }
+
+      showLoader();
+      try {
+        const res = await sendToAppsScript('saveSale', {
+          code: user.code,
+          store: store,
+          customer: customer,
+          item: item,
+          amount: amount
+        });
+        if (res.success) {
+          showToast("Sale recorded!", "success");
+          document.getElementById('saleItem').value = '';
+          document.getElementById('saleAmount').value = '';
+          $('#saleCustomerSelect').val(null).trigger('change');
+          $('#saleStore').val(null).trigger('change');
+          loadSalesData();
+        } else {
+          showToast(res.message, "error");
+        }
+      } catch (err) {
+        showToast("Entry failed", "error");
+      } finally {
+        hideLoader();
+      }
+    }
+
+    async function loadSalesData() {
+      const month = document.getElementById('salesMonthFilter').value;
+      try {
+        const data = await fetchFromAppsScript('getUserSales', {code: user.code, month});
+        const tbody = document.querySelector('#salesTable tbody');
+        tbody.innerHTML = '';
+        data.forEach(row => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${new Date(row.timestamp).toLocaleDateString()}</td><td>${row.store}</td><td>${row.customer}</td><td>${row.item}</td><td>${row.amount}</td>`;
+          tbody.appendChild(tr);
+        });
+      } catch (err) {
+        showToast("Failed to load sales", "error");
+      }
+    }
+
+    /* ================= ATTENDANCE ================= */
+    async function handlePunchIn() {
+      const store = document.getElementById('storeSelect').value;
+      if (!store) { showToast("Select store first", "error"); return; }
+      
+      showLoader();
+      try {
+        const pos = await getPosition();
         const res = await sendToAppsScript('punchIn', {
           code: user.code,
           name: user.name,
-          timestamp: now,
-          latitude: newPunchInData.lat,
-          longitude: newPunchInData.lon,
-          store: newPunchInData.store
+          store: store,
+          latitude: pos.coords.latitude,
+          longitude: pos.coords.longitude,
+          timestamp: new Date().toISOString()
         });
-        if (!res || !res.success) {
-          throw new Error(res.message || 'Punch In failed');
+        if (res.success) {
+          showToast("Punched In Successfully", "success");
+          checkPunchStatus(user.code);
+        } else {
+          showToast(res.message, "error");
         }
-        punchInData = newPunchInData;
-        localStorage.setItem('punchInData', JSON.stringify(punchInData));
-        localStorage.removeItem('punchOutData');
-        punchInBtnDisabled = true;
-        punchOutBtnDisabled = false;
-        activityFormVisible = true;
-        punchInLocationInput.value = `${newPunchInData.lat}, ${newPunchInData.lon}`;
-        storeSelect.disabled = true;
-        if (typeof $ !== 'undefined' && $.fn.select2) {
-          $('#storeSelect').select2('enable', false);
-        }
-        getActivityLocation();
-        showToast(`📍 Punch In Successful at ${store}`, "success");
       } catch (err) {
-        showToast("Punch In failed: " + err.message, "error");
+        showToast("Location access required", "error");
       } finally {
         hideLoader();
       }
-      updateUI();
     }
 
     async function handlePunchOut() {
-      if (!user || !punchInData || !punchInData.time || !punchInData.store) {
-        showToast("No valid Punch In session found. Please punch in first.", "warning");
-        return;
-      }
-      if (punchOutBtnDisabled) {
-        showToast("Punch Out is currently disabled. Please try again.", "warning");
-        return;
-      }
       showLoader();
       try {
-        const pos = await getGeoLocation();
-        const outTime = new Date().toISOString();
-        const outLat = pos.coords.latitude;
-        const outLon = pos.coords.longitude;
-        const distance = haversineDistance(punchInData.lat, punchInData.lon, outLat, outLon);
-        // Perform instant local punch-out
-        punchOutData = { lat: outLat, lon: outLon, time: outTime };
-        localStorage.setItem('punchOutData', JSON.stringify(punchOutData));
-        punchOutLocationInput.value = `${outLat}, ${outLon}`;
-        showToast(`📤 Punch Out Successful — Distance: ${distance} KM`, "success");
-        // Send punch-out data to server in the background
-        const payload = {
+        const pos = await getPosition();
+        const res = await sendToAppsScript('punchOut', {
           code: user.code,
           name: user.name,
           punchInTime: punchInData.time,
           punchInLat: punchInData.lat,
           punchInLon: punchInData.lon,
-          punchOutTime: outTime,
-          punchOutLat: outLat,
-          punchOutLon: outLon,
+          punchOutTime: new Date().toISOString(),
+          punchOutLat: pos.coords.latitude,
+          punchOutLon: pos.coords.longitude,
           store: punchInData.store
-        };
-        sendToAppsScript('punchOut', payload).catch(err => {
-          console.error('Background punch-out sync failed:', err);
-          showToast('Punch Out recorded locally but server sync failed. It will retry on next login.', 'warning');
         });
-        // Reset state
-        sessionStorage.removeItem("user");
-        localStorage.removeItem('punchInData');
-        user = null;
-        punchInData = null;
-        employeeCodeInput.value = '';
-        passwordInput.value = '';
-        punchInLocationInput.value = '';
-        storeSelect.value = '';
-        if (typeof $ !== 'undefined' && $.fn.select2) {
-          $('#storeSelect').val('').trigger('change');
+        if (res.success) {
+          showToast("Punched Out Successfully", "success");
+          punchInData = null;
+          updateUI();
+        } else {
+          showToast(res.message, "error");
         }
-        storeSelect.disabled = false;
-        storeSelect.removeAttribute('disabled');
-        if (typeof $ !== 'undefined' && $.fn.select2) {
-          $('#storeSelect').select2('enable', true);
-        }
-        activityFormVisible = false;
-        punchInBtnDisabled = false;
-        punchOutBtnDisabled = true;
-        resetActivityForm();
       } catch (err) {
-        showToast(`Punch Out failed: ${err.message}. Please try again.`, "error");
-      } finally {
-        hideLoader();
-      }
-      updateUI();
-    }
-
-    function forceReset() {
-      sessionStorage.clear();
-      localStorage.clear();
-      user = null;
-      punchInData = null;
-      punchOutData = null;
-      punchInBtnDisabled = false;
-      punchOutBtnDisabled = true;
-      activityFormVisible = false;
-      storeSelect.value = '';
-      if (typeof $ !== 'undefined' && $.fn.select2) {
-        $('#storeSelect').val('').trigger('change');
-      }
-      storeSelect.disabled = false;
-      storeSelect.removeAttribute('disabled');
-      if (typeof $ !== 'undefined' && $.fn.select2) {
-        $('#storeSelect').select2('enable', true);
-      }
-      employeeCodeInput.value = '';
-      passwordInput.value = '';
-      punchInLocationInput.value = '';
-      punchOutLocationInput.value = '';
-      resetActivityForm();
-      showToast("Session reset. Please log in again.", "info");
-      updateUI();
-    }
-
-    async function getActivityLocation() {
-      activityLocationInput.value = "Fetching GPS...";
-      try {
-        const pos = await getGeoLocation();
-        activityLocationInput.value = `${pos.coords.latitude}, ${pos.coords.longitude}`;
-      } catch (err) {
-        activityLocationInput.value = "GPS not available: " + err.message;
-        showToast(err.message, "warning");
-      }
-    }
-
-    async function submitActivity() {
-      let currentActivityLocation = activityLocationInput.value.trim();
-      const currentActivityType = activityTypeSelect.value;
-      if (currentActivityType !== "Daily Report") {
-        if (!currentActivityLocation || currentActivityLocation.includes("GPS not available") || currentActivityLocation.includes("Fetching GPS...")) {
-          showToast("Attempting to get location...", "info");
-          try {
-            const pos = await getGeoLocation();
-            currentActivityLocation = `${pos.coords.latitude}, ${pos.coords.longitude}`;
-            activityLocationInput.value = currentActivityLocation;
-          } catch (err) {
-            showToast("📍 Location is required for this activity type and could not be obtained: " + err.message, "error");
-            activityLocationInput.value = "GPS not available: " + err.message;
-            return;
-          }
-        }
-      }
-      const mobileNum = mobileInput.value.trim();
-      if (!mobileNum) {
-        return showToast("Mobile number is mandatory.", "error");
-      }
-      if (!/^\d{10}$/.test(mobileNum)) {
-        return showToast("Invalid mobile number. Please enter a 10-digit number.", "error");
-      }
-      if (!punchInData || !punchInData.store) {
-        return showToast("No store selected. Please punch in with a store.", "error");
-      }
-      if (imagesInput.files.length > 0 && resizedImagesData.length === 0) {
-        hideLoader();
-        showToast("Please wait for images to finish processing. Try again in a moment.", "info");
-        return;
-      }
-      showLoader();
-      const data = {
-        code: user.code,
-        name: user.name,
-        timestamp: new Date().toISOString(),
-        activityType: currentActivityType,
-        custCategory: custCategorySelect.value.trim(),
-        custName: custNameInput.value.trim(),
-        mobile: mobileNum,
-        location: currentActivityLocation,
-        message: messageTextarea.value.trim(),
-        store: punchInData.store
-      };
-      if (currentActivityType === "Daily Report") {
-        Object.assign(data, {
-          product: productInput.value.trim(),
-          cpc: cpcInput.value.trim(),
-          snd: sndInput.value.trim(),
-          seed: seedInput.value.trim(),
-          feq: feqInput.value.trim(),
-          vet: vetInput.value.trim(),
-          wentWell: wentWellTextarea.value.trim(),
-          notWell: notWellTextarea.value.trim(),
-          improve: improveTextarea.value.trim(),
-          support: supportTextarea.value.trim()
-        });
-      }
-      try {
-        const action = resizedImagesData.length > 0 ? 'submitActivityWithImages' : 'submitActivity';
-        const payload = resizedImagesData.length > 0 ? { ...data, images: resizedImagesData } : data;
-        const res = await sendToAppsScript(action, payload);
-        if (!res || !res.success) {
-          throw new Error(res.message || 'Activity submission failed');
-        }
-        showToast(`✅ Activity ${resizedImagesData.length > 0 ? '& Images ' : ''}Submitted`, "success");
-        resetActivityForm();
-        if (currentActivityType !== "Daily Report") {
-          getActivityLocation();
-        }
-        toggleFieldSections();
-      } catch (err) {
-        showToast("Activity submission failed: " + err.message, "error");
+        showToast("Location access required", "error");
       } finally {
         hideLoader();
       }
     }
 
-    function isAfterAutoPunchOutTime() {
-      const now = new Date();
-      const autoTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 21, 0, 0);
-      return now > autoTime;
-    }
-
-    async function checkPunchStatus(employeeCodeToCheck) {
-      storeSelect.disabled = false;
-      storeSelect.removeAttribute('disabled');
-      if (typeof $ !== 'undefined' && $.fn.select2) {
-        $('#storeSelect').select2('enable', true);
-      }
-      if (!employeeCodeToCheck) {
-        updateUI();
-        return;
-      }
-      // Check local storage for punch-in status
-      const storedPunchIn = localStorage.getItem('punchInData');
-      if (storedPunchIn) {
-        try {
-          punchInData = JSON.parse(storedPunchIn);
-          if (punchInData.code !== employeeCodeToCheck) {
-            localStorage.removeItem('punchInData');
-            punchInData = null;
-          }
-        } catch (err) {
-          console.error('Failed to parse stored punch-in data:', err);
-          localStorage.removeItem('punchInData');
+    async function checkPunchStatus(code) {
+      try {
+        const res = await sendToAppsScript('checkPunchStatus', { 
+          code, 
+          clientTimestamp: new Date().toISOString() 
+        });
+        if (res.success && res.isIn) {
+          punchInData = {
+            time: res.punchInTime,
+            lat: parseFloat(res.punchInLoc.split(',')[0]),
+            lon: parseFloat(res.punchInLoc.split(',')[1]),
+            store: res.store
+          };
+        } else {
           punchInData = null;
         }
+        updateUI();
+      } catch (err) {
+        console.error(err);
       }
-      // Check local storage for punch-out status
-      const storedPunchOut = localStorage.getItem('punchOutData');
-      if (storedPunchOut) {
-        try {
-          punchOutData = JSON.parse(storedPunchOut);
-        } catch (err) {
-          console.error('Failed to parse stored punch-out data:', err);
-          localStorage.removeItem('punchOutData');
-          punchOutData = null;
-        }
+    }
+
+    function updateUI() {
+      const statusEl = document.getElementById('punchStatus');
+      const inBtn = document.getElementById('punchInBtn');
+      const outBtn = document.getElementById('punchOutBtn');
+      const activityForm = document.getElementById('activitySection');
+      const storeSelect = document.getElementById('storeSelect');
+
+      if (punchInData) {
+        statusEl.innerText = "Punched In";
+        statusEl.className = "px-3 py-1 bg-green-100 text-green-600 rounded-full text-xs font-bold uppercase";
+        inBtn.disabled = true;
+        inBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        outBtn.disabled = false;
+        outBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        activityForm.classList.remove('hidden');
+        storeSelect.disabled = true;
+        $(storeSelect).val(punchInData.store).trigger('change');
+      } else {
+        statusEl.innerText = "Punched Out";
+        statusEl.className = "px-3 py-1 bg-red-100 text-red-600 rounded-full text-xs font-bold uppercase";
+        inBtn.disabled = false;
+        inBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        outBtn.disabled = true;
+        outBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        activityForm.classList.add('hidden');
+        storeSelect.disabled = false;
       }
+    }
+
+    /* ================= ACTIVITY ================= */
+    async function submitActivity() {
+      const type = document.getElementById('activityType').value;
+      const msg = document.getElementById('activityMsg').value.trim();
+
+      if (!type || !msg) { showToast("Fill activity fields", "error"); return; }
+
       showLoader();
       try {
-        const clientTimestamp = new Date().toISOString();
-        const res = await sendToAppsScript('checkPunchStatus', { code: employeeCodeToCheck, clientTimestamp });
-        if (!res || typeof res.isIn === 'undefined') {
-          throw new Error(res.message || 'Failed to get punch status');
+        const pos = await getPosition();
+        const payload = {
+          code: user.code,
+          name: user.name,
+          activityType: type,
+          message: msg,
+          location: `${pos.coords.latitude},${pos.coords.longitude}`,
+          timestamp: new Date().toISOString(),
+          store: punchInData.store,
+          images: []
+        };
+
+        const files = document.getElementById('activityImages').files;
+        for (let file of files) {
+          const base64 = await fileToBase64(file);
+          payload.images.push({ name: file.name, content: base64.split(',')[1] });
         }
-        if (res.isIn && res.punchInTime && res.store && !punchInData) {
-          punchInData = { lat: parseFloat(res.punchInLoc.split(',')[0]), lon: parseFloat(res.punchInLoc.split(',')[1]), time: res.punchInTime, store: res.store, code: employeeCodeToCheck };
-          localStorage.setItem('punchInData', JSON.stringify(punchInData));
-        }
-        if (res.isIn && res.punchInTime && res.store) {
-          punchInBtnDisabled = true;
-          punchOutBtnDisabled = false;
-          activityFormVisible = true;
-          punchInLocationInput.value = res.punchInLoc || "Location not recorded";
-          storeSelect.value = res.store || '';
-          if (typeof $ !== 'undefined' && $.fn.select2) {
-            $('#storeSelect').val(res.store || '').trigger('change');
-          }
-          storeSelect.disabled = true;
-          storeSelect.setAttribute('disabled', 'disabled');
-          if (typeof $ !== 'undefined' && $.fn.select2) {
-            $('#storeSelect').select2('enable', false);
-          }
-          const locParts = (res.punchInLoc || "").split(',');
-          if (locParts.length === 2 && !isNaN(parseFloat(locParts[0])) && !isNaN(parseFloat(locParts[1]))) {
-            punchInData = { lat: parseFloat(locParts[0]), lon: parseFloat(locParts[1]), time: res.punchInTime, store: res.store, code: employeeCodeToCheck };
-            localStorage.setItem('punchInData', JSON.stringify(punchInData));
-          } else {
-            punchInData = { lat: null, lon: null, time: res.punchInTime, store: res.store, code: employeeCodeToCheck };
-            localStorage.setItem('punchInData', JSON.stringify(punchInData));
-          }
-          getActivityLocation();
+
+        const action = payload.images.length > 0 ? 'submitActivityWithImages' : 'submitActivity';
+        const res = await sendToAppsScript(action, payload);
+        if (res.success) {
+          showToast("Activity submitted!", "success");
+          document.getElementById('activityMsg').value = '';
+          document.getElementById('activityImages').value = '';
         } else {
-          punchInBtnDisabled = false;
-          punchOutBtnDisabled = true;
-          activityFormVisible = false;
-          storeSelect.value = '';
-          if (typeof $ !== 'undefined' && $.fn.select2) {
-            $('#storeSelect').val('').trigger('change');
-          }
-          storeSelect.disabled = false;
-          storeSelect.removeAttribute('disabled');
-          if (typeof $ !== 'undefined' && $.fn.select2) {
-            $('#storeSelect').select2('enable', true);
-          }
-          if (!punchInData) {
-            localStorage.removeItem('punchInData');
-          }
-          setTimeout(() => {
-            if (storeSelect.disabled) {
-              storeSelect.disabled = false;
-              storeSelect.removeAttribute('disabled');
-              if (typeof $ !== 'undefined' && $.fn.select2) {
-                $('#storeSelect').select2('enable', true);
-              }
-            }
-          }, 100);
-        }
-        // Check for auto punch out after status retrieval
-        if (punchInData && isAfterAutoPunchOutTime()) {
-          showToast("Auto Punch Out triggered because it's after 7 PM IST", "info");
-          handlePunchOut();
+          showToast(res.message, "error");
         }
       } catch (err) {
-        console.error("Failed to check punch status: ", err.message);
-        showToast("Could not retrieve punch status: " + err.message, "error");
-        punchInBtnDisabled = false;
-        punchOutBtnDisabled = true;
-        activityFormVisible = false;
-        storeSelect.value = '';
-        if (typeof $ !== 'undefined' && $.fn.select2) {
-          $('#storeSelect').val('').trigger('change');
-        }
-        storeSelect.disabled = false;
-        storeSelect.removeAttribute('disabled');
-        if (typeof $ !== 'undefined' && $.fn.select2) {
-          $('#storeSelect').select2('enable', true);
-        }
-        if (!punchInData) {
-          localStorage.removeItem('punchInData');
-        }
-        setTimeout(() => {
-          if (storeSelect.disabled) {
-            storeSelect.disabled = false;
-            storeSelect.removeAttribute('disabled');
-            if (typeof $ !== 'undefined' && $.fn.select2) {
-              $('#storeSelect').select2('enable', true);
-            }
-          }
-        }, 100);
+        showToast("Error submitting", "error");
       } finally {
         hideLoader();
       }
-      updateUI();
     }
 
-    function toggleFieldSections() {
-      if (salesFeedbackSection) {
-        salesFeedbackSection.style.display = (activityTypeSelect.value === "Daily Report") ? 'block' : 'none';
-      }
-      if (activityTypeSelect.value !== "Daily Report") {
-        getActivityLocation();
-      } else {
-        activityLocationInput.value = "";
-      }
+    /* ================= HELPERS ================= */
+    function showLoader() { document.getElementById('loaderOverlay').style.display = 'flex'; }
+    function hideLoader() { document.getElementById('loaderOverlay').style.display = 'none'; }
+    
+    function showToast(msg, type) {
+      const toast = document.getElementById('toast');
+      toast.innerText = msg;
+      toast.style.background = type === 'success' ? '#48bb78' : '#f56565';
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 3000);
     }
 
-    async function processImages(files) {
-      previewImagesDiv.innerHTML = "";
-      resizedImagesData = [];
-      showToast("Processing images...", "info");
-     
-      const resizePromises = Array.from(files).map(file => {
-          return new Promise((resolve, reject) => {
-              if (!file.type.startsWith('image/')) {
-                  reject(new Error("Not an image file"));
-                  return;
-              }
-              const reader = new FileReader();
-              reader.onload = (e) => {
-                  const img = new Image();
-                  img.src = e.target.result;
-                  img.onload = () => {
-                      const MAX_WIDTH = 1024;
-                      const MAX_HEIGHT = 768;
-                      let width = img.width;
-                      let height = img.height;
-                      if (width > height) {
-                          if (width > MAX_WIDTH) {
-                              height *= MAX_WIDTH / width;
-                              width = MAX_WIDTH;
-                          }
-                      } else {
-                          if (height > MAX_HEIGHT) {
-                              width *= MAX_HEIGHT / height;
-                              height = MAX_HEIGHT;
-                          }
-                      }
-                      const canvas = document.createElement('canvas');
-                      canvas.width = width;
-                      canvas.height = height;
-                      const ctx = canvas.getContext('2d');
-                      ctx.drawImage(img, 0, 0, width, height);
-                      const resizedBase64 = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
-                     
-                      const previewImg = document.createElement("img");
-                      previewImg.src = canvas.toDataURL('image/jpeg', 0.5);
-                      previewImg.className = "h-24 w-auto rounded-lg shadow-sm mr-2 mt-2";
-                      previewImagesDiv.appendChild(previewImg);
-                      resolve({
-                          name: file.name,
-                          content: resizedBase64
-                      });
-                  };
-                  img.onerror = () => reject(new Error("Image loading error"));
-              };
-              reader.onerror = () => reject(new Error("File reading error"));
-              reader.readAsDataURL(file);
-          });
+    async function sendToAppsScript(action, payload) {
+      const response = await fetch(`${APPS_SCRIPT_WEB_APP_URL}?action=${action}`, {
+        method: 'POST',
+        body: JSON.stringify(payload)
       });
-      try {
-          resizedImagesData = await Promise.all(resizePromises);
-          showToast(`✅ ${resizedImagesData.length} images ready to upload.`, "success");
-      } catch(error) {
-          console.error("Image processing failed:", error);
-          showToast("Image processing failed. Please try again.", "error");
-          resizedImagesData = [];
-          previewImagesDiv.innerHTML = "";
+      return await response.json();
+    }
+
+    async function fetchFromAppsScript(action, params = {}) {
+      const url = new URL(APPS_SCRIPT_WEB_APP_URL);
+      url.searchParams.append('action', action);
+      for (let k in params) url.searchParams.append(k, params[k]);
+      const res = await fetch(url);
+      return await res.json();
+    }
+
+    function getPosition() {
+      return new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
+        });
+      });
+    }
+
+    function fileToBase64(file) {
+      return new Promise((res, rej) => {
+        const reader = new FileReader();
+        reader.onload = () => res(reader.result);
+        reader.onerror = rej;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function populateMonths(selectId) {
+      const sel = document.getElementById(selectId);
+      const now = new Date();
+      for (let i = 0; i < 12; i++) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const val = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        const opt = document.createElement('option');
+        opt.value = val;
+        opt.text = d.toLocaleString('default', { month: 'long', year: 'numeric' });
+        sel.add(opt);
       }
     }
 
-    function resetActivityForm() {
-      activityTypeSelect.value = 'Daily Report';
-      custCategorySelect.value = '';
-      custNameInput.value = '';
-      mobileInput.value = '';
-      activityLocationInput.value = 'Fetching GPS...';
-      messageTextarea.value = '';
-      productInput.value = '';
-      cpcInput.value = '';
-      sndInput.value = '';
-      seedInput.value = '';
-      feqInput.value = '';
-      vetInput.value = '';
-      wentWellTextarea.value = '';
-      notWellTextarea.value = '';
-      improveTextarea.value = '';
-      supportTextarea.value = '';
-      resizedImagesData = [];
-      imagesInput.value = '';
-      previewImagesDiv.innerHTML = "";
-      toggleFieldSections();
-    }
+    $(document).ready(function() {
+      $('.select2-enable').select2({ width: '100%' });
 
-    // Enhanced window.onload with error handling
-    window.addEventListener('load', function () {
-      // Hide splash screen
-      setTimeout(() => {
-        splashScreen.style.display = 'none';
-      }, 2500);
-
-      storeSelect.disabled = false;
-      storeSelect.removeAttribute('disabled');
-      storeSelect.value = '';
-     
-      const storedUser = sessionStorage.getItem("user");
-      const storedPunchOut = localStorage.getItem('punchOutData');
-      if (storedPunchOut) {
-        try {
-          punchOutData = JSON.parse(storedPunchOut);
-        } catch (err) {
-          console.error('Failed to parse stored punch-out data:', err);
-          localStorage.removeItem('punchOutData');
-          punchOutData = null;
-        }
-      }
-      if (storedUser) {
-        try {
-          user = JSON.parse(storedUser);
-          if (!user.code || !user.name) {
-            sessionStorage.clear();
-            user = null;
-            storeSelect.disabled = false;
-            storeSelect.removeAttribute('disabled');
-            showToast('Session data cleared due to invalid user. Please log in again.', 'warning');
+      $('#saleStore').on('change', async function() {
+        const store = this.value;
+        if (store) {
+          try {
+            const custs = await fetchFromAppsScript('getCustomers', { store });
+            const sel = document.getElementById('saleCustomerSelect');
+            sel.innerHTML = '<option value="">-- Select Customer --</option>';
+            custs.forEach(c => {
+              const opt = document.createElement('option');
+              opt.value = c.name;
+              opt.text = `${c.name} - ${c.mobile} (${c.type})`;
+              sel.add(opt);
+            });
+            $(sel).select2({ width: '100%' });
+          } catch (err) {
+            showToast("Failed to load customers", "error");
           }
-        } catch (err) {
-          console.error('Failed to parse stored user:', err);
-          sessionStorage.clear();
-          user = null;
-          storeSelect.disabled = false;
-          storeSelect.removeAttribute('disabled');
-          showToast('Session data cleared due to error. Please log in again.', 'error');
         }
-      }
-      try {
-        if (typeof $.fn.select2 === 'undefined') {
-          console.error('Select2 is not loaded.');
-          showToast('Dropdown search functionality failed to load. Please check your internet connection.', 'error');
-          return;
-        }
-        $('#storeSelect').select2({
-          placeholder: "Select Store",
-          allowClear: true,
-          width: '100%',
-          dropdownCssClass: 'select2-dropdown-custom',
-          minimumResultsForSearch: 1,
-          matcher: function(params, data) { // Enhanced search for mobile
-            if ($.trim(params.term) === '') {
-              return data;
-            }
-            if (typeof data.text === 'string') {
-              if (data.text.toUpperCase().indexOf(params.term.toUpperCase()) > -1) {
-                return data;
-              }
-            }
-            return null;
-          }
-        });
-        $('#storeSelect').val('').trigger('change');
-        $('#storeSelect').select2('enable', true);
-        $('#storeSelect').on('change', function() {
-          storeSelect.value = $(this).val() || '';
-        });
-      } catch (err) {
-        console.error('Select2 initialization failed:', err);
-        showToast('Failed to initialize store dropdown. Please refresh the page.', 'error');
-      }
-      if (storeSelect.disabled) {
-        storeSelect.disabled = false;
-        storeSelect.removeAttribute('disabled');
-        if (typeof $ !== 'undefined' && $.fn.select2) {
-          $('#storeSelect').select2('enable', true);
-        }
-      }
-      if (user && user.code) {
-        checkPunchStatus(user.code);
-      } else {
-        updateUI();
-      }
-      // Set up interval for auto punch out check (every minute)
-      setInterval(() => {
-        if (punchInData && isAfterAutoPunchOutTime()) {
-          showToast("Auto Punch Out at 7 PM IST", "info");
-          handlePunchOut();
-        }
-      }, 60000);
-
-      // Prevent zoom on input focus for iOS
-      document.addEventListener('touchstart', function() {}, true);
-    });
-
-    imagesInput.addEventListener("change", function () {
-      processImages(this.files);
-    });
-
-    document.addEventListener("DOMContentLoaded", () => {
-      toggleFieldSections();
-    });
-
-    // Offline detection for robustness
-    window.addEventListener('online', () => {
-      showToast('Back online!', 'success');
-    });
-    window.addEventListener('offline', () => {
-      showToast('No internet connection. Some features may be limited.', 'warning');
+      });
     });
   </script>
 </body>
